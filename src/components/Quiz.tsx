@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getDueCards, updateCardResult } from '../utils/db';
 import type { SRItem } from '../utils/db';
-import { Check, X, Loader2 } from 'lucide-react';
+import { Check, X, Loader2, Volume2 } from 'lucide-react';
 
 export default function Quiz({ onComplete }: { onComplete: () => void }) {
   const [cards, setCards] = useState<SRItem[]>([]);
@@ -20,6 +20,24 @@ export default function Quiz({ onComplete }: { onComplete: () => void }) {
     setCards(due);
     setLoading(false);
   };
+
+  const speak = useCallback((text: string) => {
+    if ('speechSynthesis' in window) {
+      // キャンセルしてキューを空にしてから即再生
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US'; 
+      utterance.rate = 0.9; // 少しゆっくりめに発音し学習しやすくする
+      window.speechSynthesis.speak(utterance);
+    }
+  }, []);
+
+  // UseEffect for automatic pronunciation when the card changes
+  useEffect(() => {
+    if (!loading && cards.length > 0 && currentIndex < cards.length && !showAnswer) {
+      speak(cards[currentIndex].vocab.term);
+    }
+  }, [currentIndex, loading, cards, showAnswer, speak]);
 
   if (loading) {
      return <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}><Loader2 className="animate-pulse" size={40} color="var(--brand-primary)" /></div>;
@@ -76,7 +94,17 @@ export default function Quiz({ onComplete }: { onComplete: () => void }) {
             {currentCard.vocab.partOfSpeech || 'Word'}
           </span>
           
-          <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{currentCard.vocab.term}</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+            <h2 style={{ fontSize: '2.5rem', margin: 0 }}>{currentCard.vocab.term}</h2>
+            <button 
+              className="btn btn-secondary" 
+              style={{ padding: '0.5rem', borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              onClick={() => speak(currentCard.vocab.term)}
+              title="Listen pronunciation"
+            >
+              <Volume2 size={24} color="var(--brand-primary)" />
+            </button>
+          </div>
           
           {blankedExample && !showAnswer && (
              <p style={{ fontStyle: 'italic', color: 'var(--text-secondary)', fontSize: '1.1rem' }}>"{blankedExample}"</p>
@@ -86,7 +114,17 @@ export default function Quiz({ onComplete }: { onComplete: () => void }) {
             <div className="animate-fade-in" style={{ marginTop: '2rem', width: '100%', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
               <h3 style={{ fontSize: '1.5rem', color: 'var(--success)', marginBottom: '1rem' }}>{currentCard.vocab.meaning}</h3>
               {currentCard.vocab.exampleSentence && (
-                 <p style={{ color: 'var(--text-secondary)' }}>"{currentCard.vocab.exampleSentence}"</p>
+                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>"{currentCard.vocab.exampleSentence}"</p>
+                    <button 
+                       className="btn btn-secondary" 
+                       style={{ padding: '0.4rem', borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                       onClick={() => speak(currentCard.vocab.exampleSentence)}
+                       title="Listen example sentence"
+                     >
+                       <Volume2 size={18} color="var(--text-secondary)" />
+                     </button>
+                 </div>
               )}
             </div>
           )}
