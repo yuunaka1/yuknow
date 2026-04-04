@@ -35,24 +35,42 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const playTimeoutRef = useRef<number | null>(null);
 
   // Audio Playback Controls
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (!audioRef.current) return;
     if (isPlaying) {
+      if (playTimeoutRef.current) {
+        window.clearTimeout(playTimeoutRef.current);
+        playTimeoutRef.current = null;
+      }
       audioRef.current.pause();
       stopRecording();
+      setIsPlaying(false);
     } else {
-      audioRef.current.play();
-      if (autoRecord) startRecording();
+      setIsPlaying(true);
+      if (autoRecord) {
+        await startRecording();
+      }
+      
+      playTimeoutRef.current = window.setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.play().catch(e => console.error("Play error:", e));
+        }
+      }, 1500);
     }
-    setIsPlaying(!isPlaying);
   };
 
   const stopAudio = () => {
     if (!audioRef.current) return;
+    if (playTimeoutRef.current) {
+      window.clearTimeout(playTimeoutRef.current);
+      playTimeoutRef.current = null;
+    }
     const endTime = audioRef.current.currentTime;
     audioRef.current.pause();
+    // 確実に先頭に戻す
     audioRef.current.currentTime = 0;
     setIsPlaying(false);
     setCurrentTime(0);
@@ -121,6 +139,14 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
       setAudioUrl(url);
       setIsPlaying(false);
       setCurrentTime(0);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      if (playTimeoutRef.current) {
+        window.clearTimeout(playTimeoutRef.current);
+        playTimeoutRef.current = null;
+      }
       clearAB();
     }
   };
