@@ -30,7 +30,7 @@ function App() {
       <header style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: 'clamp(1rem, 4vw, 2rem)' }}>
         <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.5rem' }}>
           <BrainCircuit color="var(--brand-primary)" />
-          <span className="text-gradient">// uKnow</span>
+          <span className="text-gradient">// yuKnow</span>
         </h1>
         <nav style={{ display: 'flex', gap: 'clamp(0.25rem, 2vw, 0.5rem)', flexWrap: 'wrap' }}>
           <button 
