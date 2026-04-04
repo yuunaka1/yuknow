@@ -1,0 +1,406 @@
+import React, { useState, useRef } from 'react';
+import { Upload, Play, Pause, Square, Mic, MicOff, PlayCircle, Repeat, XCircle, FileText, Bot } from 'lucide-react';
+import { transcribeAudioWithGemini, evaluateShadowingWithGemini } from '../utils/gemini';
+import { sliceAudioFileToWav } from '../utils/audioEncoder';
+
+export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: string }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  
+  const [repeatMode, setRepeatMode] = useState<boolean>(true); // true = repeat track
+  const [playbackRate, setPlaybackRate] = useState<number>(1.0);
+  
+  const [aPoint, setAPoint] = useState<number | null>(null);
+  const [bPoint, setBPoint] = useState<number | null>(null);
+  const [isAbRepeat, setIsAbRepeat] = useState<boolean>(false);
+  
+  const [isRecording, setIsRecording] = useState(false);
+  const [autoRecord, setAutoRecord] = useState(false);
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  
+  const [shadowStartTime, setShadowStartTime] = useState<number>(0);
+  const [shadowEndTime, setShadowEndTime] = useState<number>(0);
+
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcription, setTranscription] = useState<string | null>(null);
+
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [evaluation, setEvaluation] = useState<string | null>(null);
+  
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
+  // Audio Playback Controls
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      stopRecording();
+    } else {
+      audioRef.current.play();
+      if (autoRecord) startRecording();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const stopAudio = () => {
+    if (!audioRef.current) return;
+    const endTime = audioRef.current.currentTime;
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    setIsPlaying(false);
+    setCurrentTime(0);
+    stopRecording(endTime);
+  };
+
+  const handleTimeUpdate = () => {
+    if (!audioRef.current) return;
+    const current = audioRef.current.currentTime;
+    setCurrentTime(current);
+    
+    if (isAbRepeat && aPoint !== null && bPoint !== null) {
+      if (current >= bPoint) {
+        audioRef.current.currentTime = aPoint;
+      }
+    }
+  };
+
+  const handleEnded = () => {
+    if (!audioRef.current) return;
+    if (repeatMode) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    } else {
+      stopAudio();
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!audioRef.current) return;
+    const time = Number(e.target.value);
+    audioRef.current.currentTime = time;
+    setCurrentTime(time);
+  };
+
+  // A-B Repeat Controls
+  const markA = () => setAPoint(currentTime);
+  const markB = () => {
+    if (aPoint !== null && currentTime > aPoint) {
+      setBPoint(currentTime);
+      setIsAbRepeat(true);
+    }
+  };
+  const clearAB = () => {
+    setAPoint(null);
+    setBPoint(null);
+    setIsAbRepeat(false);
+  };
+
+  // Speed Control
+  const changeSpeed = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const rate = Number(e.target.value);
+    setPlaybackRate(rate);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = rate;
+    }
+  };
+
+  // File Upload
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      setFile(selectedFile);
+      const url = URL.createObjectURL(selectedFile);
+      setAudioUrl(url);
+      setIsPlaying(false);
+      setCurrentTime(0);
+      clearAB();
+    }
+  };
+
+  // Recording Controls
+  const startRecording = async () => {
+    if (isRecording) return;
+    if (audioRef.current) {
+      setShadowStartTime(audioRef.current.currentTime);
+    }
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorder.onstop = () => {
+        const actualType = audioChunksRef.current[0]?.type || '';
+        const mimeType = actualType || (MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4');
+        
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        const url = URL.createObjectURL(audioBlob);
+        setRecordedUrl(url);
+        setRecordedBlob(audioBlob);
+        setTranscription(null);
+        setEvaluation(null);
+        setIsRecording(false);
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Recording failed", err);
+      alert("マイクへのアクセスが許可されていません。");
+      setAutoRecord(false);
+    }
+  };
+
+  const stopRecording = (forcedEndTime?: number) => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      const eTime = forcedEndTime !== undefined ? forcedEndTime : (audioRef.current?.currentTime || 0);
+      setShadowEndTime(eTime);
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const toggleAutoRecord = () => {
+    const nextAuto = !autoRecord;
+    setAutoRecord(nextAuto);
+    if (nextAuto && isPlaying && !isRecording) {
+      startRecording();
+    } else if (!nextAuto && isRecording) {
+      stopRecording();
+    }
+  };
+
+  const handleTranscribe = async () => {
+    if (!recordedBlob || !geminiApiKey) return;
+    setIsTranscribing(true);
+    setTranscription(null);
+    try {
+      const result = await transcribeAudioWithGemini(geminiApiKey, recordedBlob);
+      setTranscription(result);
+    } catch (err) {
+      console.error(err);
+      alert("文字起こしに失敗しました。APIキーが正しく設定されているか確認してください。");
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  const handleEvaluate = async () => {
+    if (!file || !recordedBlob || !geminiApiKey) return;
+    setIsEvaluating(true);
+    setEvaluation(null);
+    try {
+      const sourceWav = await sliceAudioFileToWav(file, shadowStartTime, shadowEndTime);
+      const result = await evaluateShadowingWithGemini(geminiApiKey, sourceWav, recordedBlob);
+      setEvaluation(result);
+    } catch (err) {
+      console.error(err);
+      alert("評価中にエラーが発生しました。ファイルが長すぎる場合などに失敗することがあります。");
+    } finally {
+      setIsEvaluating(false);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const mins = Math.floor(time / 60);
+    const secs = Math.floor(time % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+
+
+  const btnStyle: React.CSSProperties = {
+    backgroundColor: 'transparent',
+    color: '#00ff41',
+    border: '1px solid #00ff41',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.9rem',
+    textTransform: 'uppercase',
+  };
+
+  return (
+    <div className="glass-panel" style={{ padding: 'clamp(1rem, 4vw, 2rem)' }}>
+      <div style={{ paddingBottom: '1rem', borderBottom: '1px solid #005000', marginBottom: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <PlayCircle size={24} /> ShadowTerm Web
+        </h2>
+        <p style={{ margin: '0.5rem 0 0', opacity: 0.8, fontSize: '0.9rem' }}>
+          Standalone audio player for shadowing practice.
+        </p>
+      </div>
+
+      <div style={{ marginBottom: '1.5rem' }}>
+        <label style={{ ...btnStyle, display: 'inline-flex' }}>
+          <Upload size={18} /> Load Audio File
+          <input 
+            type="file" 
+            accept="audio/*" 
+            onChange={handleFileChange} 
+            style={{ display: 'none' }} 
+          />
+        </label>
+        {file && <span style={{ marginLeft: '1rem', opacity: 0.8 }}>Loaded: {file.name}</span>}
+      </div>
+
+      {audioUrl && (
+        <div style={{ backgroundColor: 'rgba(0, 255, 65, 0.05)', padding: 'clamp(0.5rem, 2vw, 1rem)', borderRadius: '4px', border: '1px solid #005000' }}>
+          <audio 
+            ref={audioRef}
+            src={audioUrl}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
+            onEnded={handleEnded}
+          />
+
+          {/* Time & Seek Bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+            <span style={{ minWidth: '40px' }}>{formatTime(currentTime)}</span>
+            <input 
+              type="range" 
+              min={0} 
+              max={duration} 
+              step="0.1"
+              value={currentTime}
+              onChange={handleSeek}
+              style={{ flex: 1, accentColor: '#00ff41' }}
+            />
+            <span style={{ minWidth: '40px' }}>{formatTime(duration)}</span>
+          </div>
+
+          {/* Controls */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+            <button onClick={togglePlay} style={{ ...btnStyle, backgroundColor: 'rgba(0,255,65,0.1)' }}>
+              {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+              {isPlaying ? 'PAUSE' : 'PLAY'}
+            </button>
+            <button onClick={stopAudio} style={btnStyle}>
+              <Square size={18} /> STOP
+            </button>
+            
+            <div style={{ width: '1px', height: '24px', backgroundColor: '#005000', margin: '0 0.5rem' }} />
+
+            <button onClick={() => setRepeatMode(!repeatMode)} style={{ ...btnStyle, opacity: repeatMode ? 1 : 0.5 }}>
+              <Repeat size={18} /> {repeatMode ? 'TRACK: LP' : 'TRACK: 1'}
+            </button>
+
+            <select 
+              value={playbackRate} 
+              onChange={changeSpeed}
+              style={{ ...btnStyle, backgroundColor: '#0a0a00', appearance: 'none', paddingRight: '2rem' }}
+            >
+              <option value={0.75} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>0.75x SPD</option>
+              <option value={0.80} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>0.80x SPD</option>
+              <option value={0.85} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>0.85x SPD</option>
+              <option value={0.90} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>0.90x SPD</option>
+              <option value={0.95} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>0.95x SPD</option>
+              <option value={1.00} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>1.00x SPD</option>
+              <option value={1.05} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>1.05x SPD</option>
+              <option value={1.10} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>1.10x SPD</option>
+              <option value={1.15} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>1.15x SPD</option>
+              <option value={1.20} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>1.20x SPD</option>
+              <option value={1.25} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>1.25x SPD</option>
+            </select>
+          </div>
+
+          {/* A-B Repeat Controls */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.5rem, 2vw, 1rem)', flexWrap: 'wrap', padding: 'clamp(0.5rem, 2vw, 1rem)', backgroundColor: 'rgba(0, 0, 0, 0.5)', border: '1px dashed #005000', borderRadius: '4px' }}>
+            <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>A-B REPEAT:</span>
+            <button onClick={markA} style={btnStyle}>
+              [A] {aPoint !== null ? formatTime(aPoint) : 'MARK'}
+            </button>
+            <button onClick={markB} disabled={aPoint === null} style={{ ...btnStyle, opacity: aPoint === null ? 0.3 : 1 }}>
+              [B] {bPoint !== null ? formatTime(bPoint) : 'MARK'}
+            </button>
+            {isAbRepeat && (
+              <button onClick={clearAB} style={btnStyle}>
+                <XCircle size={18} /> CLEAR
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Recording Section */}
+      <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px dashed #005000' }}>
+        <h3 style={{ fontSize: '1.1rem', marginTop: 0, marginBottom: '1rem' }}>// Audio Shadowing</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button 
+            onClick={toggleAutoRecord} 
+            style={{ ...btnStyle, backgroundColor: autoRecord ? 'rgba(0, 255, 65, 0.1)' : 'transparent' }}
+          >
+            {autoRecord ? <Mic size={18} /> : <MicOff size={18} />}
+            {autoRecord ? 'AUTO REC: ON' : 'AUTO REC: OFF'}
+          </button>
+          
+          {isRecording && <span style={{ color: '#ff3333', animation: 'pulse 1.5s infinite' }}>● Recording</span>}
+        </div>
+
+        {recordedUrl && !isRecording && (
+          <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>Recorded VCE:</span>
+            <audio src={recordedUrl} controls style={{ height: '32px' }} />
+            
+            {geminiApiKey && (
+              <>
+                <button 
+                  onClick={handleTranscribe} 
+                  style={{ ...btnStyle, opacity: isTranscribing ? 0.5 : 1 }} 
+                  disabled={isTranscribing || isEvaluating}
+                >
+                  <FileText size={18} />
+                  {isTranscribing ? 'TRANSCRIBING...' : 'TRANSCRIBE'}
+                </button>
+                <button 
+                  onClick={handleEvaluate} 
+                  style={{ ...btnStyle, opacity: isEvaluating ? 0.5 : 1, borderColor: '#ffed00', color: '#ffed00' }} 
+                  disabled={isEvaluating || isTranscribing}
+                >
+                  <Bot size={18} />
+                  {isEvaluating ? 'EVALUATING...' : 'EVALUATE !'}
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {transcription && (
+          <div style={{ marginTop: '1rem', padding: 'clamp(0.75rem, 2vw, 1rem)', backgroundColor: 'rgba(0, 255, 65, 0.1)', border: '1px solid #005000', borderRadius: '4px' }}>
+            <span style={{ display: 'block', fontSize: '0.8rem', opacity: 0.8, marginBottom: '0.5rem' }}>// TRANSCRIPTION RESULT:</span>
+            <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.5, color: '#e0ffe0' }}>
+              {transcription}
+            </p>
+          </div>
+        )}
+
+        {evaluation && (
+          <div style={{ marginTop: '1rem', padding: 'clamp(0.75rem, 2vw, 1rem)', backgroundColor: 'rgba(255, 237, 0, 0.1)', border: '1px solid #ffed00', borderRadius: '4px', overflowX: 'auto' }}>
+            <span style={{ display: 'block', fontSize: '0.8rem', opacity: 0.8, marginBottom: '0.5rem', color: '#ffed00' }}>// EVALUATION RESULT:</span>
+            <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.5, color: '#ffffff' }}>
+              {evaluation}
+            </p>
+          </div>
+        )}
+      </div>
+
+    </div>
+  );
+}

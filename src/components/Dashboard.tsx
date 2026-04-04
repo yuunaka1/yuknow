@@ -61,7 +61,7 @@ export default function Dashboard({ googleClientId, geminiApiKey, docId, onStart
   return (
     <div className="animate-fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h2>Dashboard</h2>
+        <h2>Flashcards</h2>
         <div>
           {!token ? (
             <button 
