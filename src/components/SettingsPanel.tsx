@@ -71,9 +71,15 @@ export default function SettingsPanel({
         </p>
       </div>
       
+      {geminiApiKey && !googleClientId && (
+        <div style={{ padding: '1rem', backgroundColor: 'var(--success-bg)', color: 'var(--success)', borderRadius: '4px', marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px dashed var(--success)' }}>
+          <strong>Shadowing Ready!</strong> You can now use the Shadowing feature.
+        </div>
+      )}
+      
       {googleClientId && geminiApiKey && docId && (
-        <div style={{ padding: '1rem', backgroundColor: 'var(--success-bg)', color: 'var(--success)', borderRadius: '8px', marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <strong>Ready!</strong> You can now use the dashboard to parse vocabulary.
+        <div style={{ padding: '1rem', backgroundColor: 'var(--success-bg)', color: 'var(--success)', borderRadius: '4px', marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px dashed var(--success)' }}>
+          <strong>All Systems Ready!</strong> You can now use both Flashcards and Shadowing.
         </div>
       )}
     </div>

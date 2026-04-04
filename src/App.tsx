@@ -16,12 +16,15 @@ function App() {
   const [geminiApiKey, setGeminiApiKey] = useLocalStorage('uknow_gemini_api_key', '');
   const [docId, setDocId] = useLocalStorage('uknow_doc_id', '');
   
-  const isConfigured = googleClientId && geminiApiKey && docId;
-
+  const isFlashcardConfigured = googleClientId && geminiApiKey && docId;
+  const isShadowingConfigured = !!geminiApiKey;
+  
   // 初期ステートで設定が完了していればダッシュボードを開く
   React.useEffect(() => {
-    if (isConfigured && view === 'settings') {
+    if (isFlashcardConfigured && view === 'settings') {
       setView('dashboard');
+    } else if (isShadowingConfigured && !isFlashcardConfigured && view === 'settings') {
+      setView('shadowing');
     }
   }, []);
 
@@ -36,14 +39,14 @@ function App() {
           <button 
             className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
             onClick={() => setView('dashboard')}
-            disabled={!isConfigured}
+            disabled={!isFlashcardConfigured}
           >
             <BookOpen size={18} /> Flashcards
           </button>
           <button 
             className={`btn ${view === 'shadowing' ? 'btn-primary' : 'btn-secondary'}`} 
             onClick={() => setView('shadowing')}
-            disabled={!isConfigured}
+            disabled={!isShadowingConfigured}
           >
             <Headphones size={18} /> Shadowing
           </button>
@@ -77,7 +80,7 @@ function App() {
           />
         )}
         
-        {view === 'dashboard' && isConfigured && (
+        {view === 'dashboard' && isFlashcardConfigured && (
           <Dashboard
             googleClientId={googleClientId}
             geminiApiKey={geminiApiKey}
@@ -90,7 +93,7 @@ function App() {
           <Quiz onComplete={() => setView('dashboard')} />
         )}
 
-        {view === 'shadowing' && isConfigured && (
+        {view === 'shadowing' && isShadowingConfigured && (
           <ShadowingPlayer geminiApiKey={geminiApiKey} />
         )}
         
