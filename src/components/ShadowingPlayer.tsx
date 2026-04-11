@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Play, Pause, Square, Mic, MicOff, PlayCircle, Repeat, XCircle, FileText, Bot, MonitorOff, MonitorSmartphone } from 'lucide-react';
+import { get, set } from 'idb-keyval';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { transcribeAudioWithGemini, evaluateShadowingWithGemini } from '../utils/gemini';
 import { sliceAudioFileToWav } from '../utils/audioEncoder';
@@ -72,6 +73,23 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
       releaseWakeLock();
     };
   }, [isPlaying, keepAwake]);
+
+  // Load cached audio file on mount
+  useEffect(() => {
+    const loadCachedAudio = async () => {
+      try {
+        const cachedFile = await get<File>('uknow_shadowing_audio_file');
+        if (cachedFile) {
+          setFile(cachedFile);
+          const url = URL.createObjectURL(cachedFile);
+          setAudioUrl(url);
+        }
+      } catch (err) {
+        console.error("Failed to load cached audio:", err);
+      }
+    };
+    loadCachedAudio();
+  }, []);
 
   // Audio Playback Controls
   const togglePlay = async () => {
@@ -166,7 +184,7 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
   };
 
   // File Upload
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       if (audioUrl) URL.revokeObjectURL(audioUrl);
@@ -184,6 +202,12 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
         playTimeoutRef.current = null;
       }
       clearAB();
+
+      try {
+        await set('uknow_shadowing_audio_file', selectedFile);
+      } catch (err) {
+        console.error('Failed to cache audio file:', err);
+      }
     }
   };
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### 🐛 Bug Fixes & Refactoring
+- **Shadowing**: 選択したオーディオファイルがページリロード後に失われる問題を修正 (Fixes #2)
+  - `idb-keyval` を利用し、読み込んだ音声ファイル自体をブラウザのローカルデータベース (IndexedDB) に自動キャッシュ。
+  - 次回アクセス時やリロード時に、アップロード済みファイルを自動で復元再開する機能を実装。
+
 ## [1.0.0] - 2026-04-11
 
 ### ✨ Features (新機能・大規模な更新)
