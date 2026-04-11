@@ -19,6 +19,8 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
   const [aPoint, setAPoint] = useState<number | null>(null);
   const [bPoint, setBPoint] = useState<number | null>(null);
   const [isAbRepeat, setIsAbRepeat] = useState<boolean>(false);
+  const [targetLoops, setTargetLoops] = useState<number>(0);
+  const [remainingLoops, setRemainingLoops] = useState<number>(0);
   
   const [isRecording, setIsRecording] = useState(false);
   const [autoRecord, setAutoRecord] = useState(false);
@@ -138,6 +140,14 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
     
     if (isAbRepeat && aPoint !== null && bPoint !== null) {
       if (current >= bPoint) {
+        if (targetLoops > 0) {
+          if (remainingLoops <= 1) {
+            stopAudio();
+            setRemainingLoops(targetLoops);
+            return;
+          }
+          setRemainingLoops(prev => prev - 1);
+        }
         audioRef.current.currentTime = aPoint;
       }
     }
@@ -146,6 +156,14 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
   const handleEnded = () => {
     if (!audioRef.current) return;
     if (repeatMode) {
+      if (targetLoops > 0) {
+        if (remainingLoops <= 1) {
+          stopAudio();
+          setRemainingLoops(targetLoops);
+          return;
+        }
+        setRemainingLoops(prev => prev - 1);
+      }
       audioRef.current.currentTime = 0;
       audioRef.current.play();
     } else {
@@ -181,6 +199,12 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
     if (audioRef.current) {
       audioRef.current.playbackRate = rate;
     }
+  };
+
+  const handleLoopTargetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = Number(e.target.value);
+    setTargetLoops(val);
+    setRemainingLoops(val);
   };
 
   // File Upload
@@ -387,6 +411,24 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
             <button onClick={() => setRepeatMode(!repeatMode)} style={{ ...btnStyle, opacity: repeatMode ? 1 : 0.5 }}>
               <Repeat size={18} /> {repeatMode ? 'TRACK: LP' : 'TRACK: 1'}
             </button>
+
+            <select 
+              value={targetLoops} 
+              onChange={handleLoopTargetChange}
+              style={{ ...btnStyle, backgroundColor: '#0a0a00', appearance: 'none', paddingRight: '1rem', opacity: targetLoops > 0 ? 1 : 0.5 }}
+            >
+              <option value={0} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>LOOP: INF</option>
+              <option value={5} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>LOOP: 5</option>
+              <option value={10} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>LOOP: 10</option>
+              <option value={20} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>LOOP: 20</option>
+              <option value={30} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>LOOP: 30</option>
+            </select>
+
+            {targetLoops > 0 && (
+              <span style={{ fontSize: '1rem', color: '#00ff41', fontWeight: 'bold' }}>
+                [{remainingLoops} / {targetLoops}]
+              </span>
+            )}
 
             <select 
               value={playbackRate} 

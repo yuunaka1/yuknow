@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### ✨ Features
+- **Shadowing**: 目標ループ回数の設定とカウントダウン機能を追加 (Fixes #3)
+  - シャドーイングの反復練習用に「指定回数（5/10/20/30回）ループすると自動停止する」機能を追加。
+  - 残りループ回数を表示するリアルタイムインジケーターをコントロールパネルに設置。
+  - A-B間リピート、およびトラック全体リピートの両方に対応。
+
 ### 🐛 Bug Fixes & Refactoring
 - **Shadowing**: 選択したオーディオファイルがページリロード後に失われる問題を修正 (Fixes #2)
   - `idb-keyval` を利用し、読み込んだ音声ファイル自体をブラウザのローカルデータベース (IndexedDB) に自動キャッシュ。
