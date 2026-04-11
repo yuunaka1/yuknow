@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2026-04-12
+
+### ♻️ Refactoring (機能統合)
+- **Shadowing**: 「TRACK Repeat（トラック全体ループ）」機能と「目標ループ回数表示」を一つのセレクトボックスに統合。
+  - 単純な1回再生（OFF）、無限ループ（INF）、指定回数ループ（5, 10, 20...）などを1箇所で一元管理できるように改修。
+  - 重複していたトラックリピート専用ボタンを削除し、UIをより直感的に操作できるようにシンプル化。
+
 ## [1.1.0] - 2026-04-12
 
 ### ✨ Features

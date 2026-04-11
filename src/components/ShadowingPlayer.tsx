@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Play, Pause, Square, Mic, MicOff, PlayCircle, Repeat, XCircle, FileText, Bot, MonitorOff, MonitorSmartphone } from 'lucide-react';
+import { Upload, Play, Pause, Square, Mic, MicOff, PlayCircle, XCircle, FileText, Bot, MonitorOff, MonitorSmartphone } from 'lucide-react';
 import { get, set } from 'idb-keyval';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { transcribeAudioWithGemini, evaluateShadowingWithGemini } from '../utils/gemini';
@@ -13,7 +13,6 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   
-  const [repeatMode, setRepeatMode] = useState<boolean>(false); // true = repeat track
   const [playbackRate, setPlaybackRate] = useState<number>(1.0);
   
   const [aPoint, setAPoint] = useState<number | null>(null);
@@ -140,10 +139,16 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
     
     if (isAbRepeat && aPoint !== null && bPoint !== null) {
       if (current >= bPoint) {
+        if (targetLoops === 0) {
+          stopAudio();
+          audioRef.current.currentTime = aPoint;
+          return;
+        }
         if (targetLoops > 0) {
           if (remainingLoops <= 1) {
             stopAudio();
             setRemainingLoops(targetLoops);
+            audioRef.current.currentTime = aPoint;
             return;
           }
           setRemainingLoops(prev => prev - 1);
@@ -155,20 +160,20 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
 
   const handleEnded = () => {
     if (!audioRef.current) return;
-    if (repeatMode) {
-      if (targetLoops > 0) {
-        if (remainingLoops <= 1) {
-          stopAudio();
-          setRemainingLoops(targetLoops);
-          return;
-        }
-        setRemainingLoops(prev => prev - 1);
-      }
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
-    } else {
+    if (targetLoops === 0) {
       stopAudio();
+      return;
     }
+    if (targetLoops > 0) {
+      if (remainingLoops <= 1) {
+        stopAudio();
+        setRemainingLoops(targetLoops);
+        return;
+      }
+      setRemainingLoops(prev => prev - 1);
+    }
+    audioRef.current.currentTime = 0;
+    audioRef.current.play();
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -408,20 +413,17 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
             
             <div style={{ width: '1px', height: '24px', backgroundColor: '#005000', margin: '0 0.5rem' }} />
 
-            <button onClick={() => setRepeatMode(!repeatMode)} style={{ ...btnStyle, opacity: repeatMode ? 1 : 0.5 }}>
-              <Repeat size={18} /> {repeatMode ? 'TRACK: LP' : 'TRACK: 1'}
-            </button>
-
             <select 
               value={targetLoops} 
               onChange={handleLoopTargetChange}
-              style={{ ...btnStyle, backgroundColor: '#0a0a00', appearance: 'none', paddingRight: '1rem', opacity: targetLoops > 0 ? 1 : 0.5 }}
+              style={{ ...btnStyle, backgroundColor: '#0a0a00', appearance: 'none', paddingRight: '1rem', opacity: targetLoops === 0 ? 0.5 : 1 }}
             >
-              <option value={0} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>LOOP: INF</option>
-              <option value={5} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>LOOP: 5</option>
-              <option value={10} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>LOOP: 10</option>
-              <option value={20} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>LOOP: 20</option>
-              <option value={30} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>LOOP: 30</option>
+              <option value={0} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>REPEAT: OFF</option>
+              <option value={-1} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>REPEAT: INF</option>
+              <option value={5} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>REPEAT: 5</option>
+              <option value={10} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>REPEAT: 10</option>
+              <option value={20} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>REPEAT: 20</option>
+              <option value={30} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>REPEAT: 30</option>
             </select>
 
             {targetLoops > 0 && (
