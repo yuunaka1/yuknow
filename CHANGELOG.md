@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.1.0] - 2026-04-12
 
 ### ✨ Features
 - **Shadowing**: 目標ループ回数の設定とカウントダウン機能を追加 (Fixes #3)
