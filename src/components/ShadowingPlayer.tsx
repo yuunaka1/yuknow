@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
-import { Upload, Play, Pause, Square, Mic, MicOff, PlayCircle, Repeat, XCircle, FileText, Bot } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Upload, Play, Pause, Square, Mic, MicOff, PlayCircle, Repeat, XCircle, FileText, Bot, MonitorOff, MonitorSmartphone } from 'lucide-react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 import { transcribeAudioWithGemini, evaluateShadowingWithGemini } from '../utils/gemini';
 import { sliceAudioFileToWav } from '../utils/audioEncoder';
 
@@ -11,7 +12,7 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   
-  const [repeatMode, setRepeatMode] = useState<boolean>(true); // true = repeat track
+  const [repeatMode, setRepeatMode] = useState<boolean>(false); // true = repeat track
   const [playbackRate, setPlaybackRate] = useState<number>(1.0);
   
   const [aPoint, setAPoint] = useState<number | null>(null);
@@ -20,6 +21,7 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
   
   const [isRecording, setIsRecording] = useState(false);
   const [autoRecord, setAutoRecord] = useState(false);
+  const [keepAwake, setKeepAwake] = useLocalStorage('uknow_keep_awake', false);
   const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   
@@ -36,6 +38,40 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const playTimeoutRef = useRef<number | null>(null);
+  const wakeLockRef = useRef<any>(null);
+
+  // Screen Wake Lock
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+          wakeLockRef.current.addEventListener('release', () => {
+            wakeLockRef.current = null;
+          });
+        }
+      } catch (err) {
+        console.error("Wake Lock error:", err);
+      }
+    };
+
+    const releaseWakeLock = async () => {
+      if (wakeLockRef.current) {
+        await wakeLockRef.current.release().catch(console.error);
+        wakeLockRef.current = null;
+      }
+    };
+
+    if (isPlaying && keepAwake) {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+
+    return () => {
+      releaseWakeLock();
+    };
+  }, [isPlaying, keepAwake]);
 
   // Audio Playback Controls
   const togglePlay = async () => {
@@ -368,13 +404,21 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
       {/* Recording Section */}
       <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px dashed #005000' }}>
         <h3 style={{ fontSize: '1.1rem', marginTop: 0, marginBottom: '1rem' }}>// Audio Shadowing</h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
           <button 
             onClick={toggleAutoRecord} 
             style={{ ...btnStyle, backgroundColor: autoRecord ? 'rgba(0, 255, 65, 0.1)' : 'transparent' }}
           >
             {autoRecord ? <Mic size={18} /> : <MicOff size={18} />}
             {autoRecord ? 'AUTO REC: ON' : 'AUTO REC: OFF'}
+          </button>
+          
+          <button 
+            onClick={() => setKeepAwake(!keepAwake)} 
+            style={{ ...btnStyle, backgroundColor: keepAwake ? 'rgba(0, 255, 65, 0.1)' : 'transparent' }}
+          >
+            {keepAwake ? <MonitorSmartphone size={18} /> : <MonitorOff size={18} />}
+            {keepAwake ? 'WAKE LOCK: ON' : 'WAKE LOCK: OFF'}
           </button>
           
           {isRecording && <span style={{ color: '#ff3333', animation: 'pulse 1.5s infinite' }}>● Recording</span>}

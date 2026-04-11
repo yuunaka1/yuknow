@@ -1,7 +1,7 @@
 {
   "name": "yuknow",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "push": "git add . && git commit -m \"chore: auto update\" && git push origin main"
+    "push": "git add . && git commit -m \"chore: auto update\" && git push origin main",
+    "release:patch": "npm version patch && git push --follow-tags origin main",
+    "release:minor": "npm version minor && git push --follow-tags origin main",
+    "release:major": "npm version major && git push --follow-tags origin main"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
