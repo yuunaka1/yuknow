@@ -61,4 +61,5 @@ npm run deploy
 3. **[Shadowing] タブで発音練習**:
    手持ちのリスニング用MP3をロードして再生し、A-Bリピートで練習しつつ「AUTO REC」で自分の声を録音。「EVALUATE !」ボタンでAIから厳しいフィードバックをもらって発音を改善します。
 
-
+## 📄 License
+This project is licensed under the [MIT License](LICENSE).
