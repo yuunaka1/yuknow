@@ -1,5 +1,7 @@
 # yuKnow (ShadowTerm Edition) 🕶️🟢
 
+🚀 **Play instantly on the web:** [https://yuunaka1.github.io/yuknow/](https://yuunaka1.github.io/yuknow/)
+
 yuKnow は、サーバーを持たずに完全クライアントサイドで動作する、プライバシー重視の語学学習・シャドーイング支援アプリケーションです。すべての処理はブラウザ内で完結し、外部のバックエンドサーバーを必要としないため、サーバー維持費「0円」で高度なAI語学学習を実践できます。
 
 ## ✨ Core Features
