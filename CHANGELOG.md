@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.2.0] - 2026-04-12
 
 ### ✨ Features
 - **Lesson Coaching**: オンライン英会話レッスンの振り返りに特化した新メニュー「Coaching」を追加 (Fixes #5)
