@@ -2,7 +2,7 @@
 
 🚀 **Play instantly on the web:** [https://yuunaka1.github.io/yuknow/](https://yuunaka1.github.io/yuknow/)
 
-yuKnow は、サーバーを持たずに完全クライアントサイドで動作する、プライバシー重視の語学学習・シャドーイング支援アプリケーションです。すべての処理はブラウザ内で完結し、外部のバックエンドサーバーを必要としないため、サーバー維持費「0円」で高度なAI語学学習を実践できます。
+yuKnow は、独自のバックエンドサーバーを持たずに完全クライアントサイド（ブラウザ）で動作する、語学学習・シャドーイング支援アプリケーションです。AI解析（Gemini API）やデータ同期（Google Docs API）などの外部サービスとブラウザが直接通信するため、専用バックエンドの維持費「0円」で高度なAI語学学習を実践できます。
 
 ## ✨ Core Features
 
@@ -45,11 +45,11 @@ npm run dev
 
 ### Deployment (本番環境・スマホ用)
 自分のスマホからいつでもアクセスしたい場合は、GitHub Pages 等へデプロイしてください。
-（本プロジェクトには `npm run deploy` が設定されており、gh-pages パッケージで自動アップロードされる設計になっています。）
+（本プロジェクトには GitHub Actions による CI/CD パイプライン `.github/workflows/ci-cd.yml` が設定されており、タグをプッシュするだけで自動的に GitHub Pages へのビルドと公開が行われます。）
 
 ```bash
-# GitHub Pages へのデプロイ
-npm run deploy
+# バージョンを上げてGitHubへ自動デプロイさせる場合
+npm run release:patch
 ```
 
 ---
