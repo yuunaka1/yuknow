@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [1.1.1] - 2026-04-12
 
+### 🐛 Bug Fixes
+- **Shadowing**: マイクでの録音開始時に、再生中の音声品質が劣化し、スマホが「通話モード」になってしまう問題を解消 (Fixes #6)
+  - ブラウザ標準のハードウェア・エコーキャンセル処理 (`echoCancellation: true`) が Bluetoothイヤホン等を強制的に低音質モード（HFP仕様）に切り替えてしまう現象を回避するため、マイク取得時の各種DSP処理を無効化する修正を行いました。
+
 ### ♻️ Refactoring (機能統合)
 - **Shadowing**: 「TRACK Repeat（トラック全体ループ）」機能と「目標ループ回数表示」を一つのセレクトボックスに統合。
   - 単純な1回再生（OFF）、無限ループ（INF）、指定回数ループ（5, 10, 20...）などを1箇所で一元管理できるように改修。
