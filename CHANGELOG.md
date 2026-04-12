@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### ✨ Features
+- **Lesson Coaching**: オンライン英会話レッスンの振り返りに特化した新メニュー「Coaching」を追加 (Fixes #5)
+  - 録音したオンライン英会話の音声ファイル（MP3等、最大20MB）をアップロードし、Geminiに生徒側の発言のみにフォーカスして分析させる機能を実装。
+  - プロンプトをカスタマイズし、「今日の総評」「良かった点」「改善点」「不自然だった表現とその修正案」「そのまま使える言い換え例」といった実践的なフィードバックをハッカー風UIで表示するようにしました。
+
 ## [1.1.1] - 2026-04-12
 
 ### 🐛 Bug Fixes

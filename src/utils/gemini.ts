@@ -133,3 +133,75 @@ TRANSCRIPT: [1番目の音声の文字起こし]
     throw new Error("Failed to evaluate audio.");
   }
 }
+
+export async function analyzeLessonAudioWithGemini(apiKey: string, audioBlob: Blob): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+  
+  const base64data = await blobToBase64(audioBlob);
+  const mimeType = audioBlob.type || 'audio/mp4';
+
+  const prompt = `You are an English speaking coach analyzing my online English lesson.
+
+I will provide an audio recording of my lesson.
+Please analyze only my English output, not the teacher’s, unless comparison is helpful.
+
+I want practical feedback that helps me improve for the next lesson.
+Please respond in Japanese and use the following structure exactly (output plain text Markdown):
+
+1. 今日の総評
+- My overall speaking level in this lesson
+- What I did well
+- What held me back most
+
+2. 良かった点
+- 3 specific strengths from my speaking
+
+3. 改善点
+- 3 to 5 important weaknesses
+- Focus on high-impact issues, not tiny mistakes
+
+4. 不自然だった表現
+For each item:
+- My original sentence
+- Why it sounds unnatural
+- A more natural correction
+- A simpler correction I can actually use in conversation
+
+5. 詰まりやすかった場面の分析
+- Where I hesitated or got stuck
+- Why that happened
+- What I should practice to fix it
+
+6. 次回までの練習ポイント
+- 3 concrete things to practice before the next lesson
+
+7. そのまま使える言い換え例
+- Give me 10 useful English phrases based on mistakes from this lesson
+
+8. 復習用ミニまとめ
+- A short summary I can reread in 1 minute
+
+Important rules:
+- Be specific and practical
+- Prioritize fluency and natural speaking over perfect grammar
+- Do not overwhelm me with too many corrections
+- Focus on the most useful improvements`;
+
+  try {
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          data: base64data,
+          mimeType: mimeType
+        }
+      },
+      { text: prompt }
+    ]);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (e) {
+    console.error("Gemini Lesson Analysis error:", e);
+    throw new Error("Failed to analyze lesson audio.");
+  }
+}

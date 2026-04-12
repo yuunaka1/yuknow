@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Settings, BookOpen, BrainCircuit, Headphones, HelpCircle } from 'lucide-react';
+import { Settings, BookOpen, BrainCircuit, Headphones, HelpCircle, MessageSquare } from 'lucide-react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import SettingsPanel from './components/SettingsPanel';
 import Dashboard from './components/Dashboard';
 import Quiz from './components/Quiz';
 import ShadowingPlayer from './components/ShadowingPlayer';
+import Coaching from './components/Coaching';
 import readmeText from '../README.md?raw';
 
-type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'help';
+type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'help';
 
 function App() {
   const [view, setView] = useState<View>('settings');
@@ -49,6 +50,13 @@ function App() {
             disabled={!isShadowingConfigured}
           >
             <Headphones size={18} /> Shadowing
+          </button>
+          <button 
+            className={`btn ${view === 'coaching' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setView('coaching')}
+            disabled={!isShadowingConfigured}
+          >
+            <MessageSquare size={18} /> Coaching
           </button>
           <button 
             className={`btn ${view === 'settings' ? 'btn-primary' : 'btn-secondary'}`} 
@@ -95,6 +103,10 @@ function App() {
 
         {view === 'shadowing' && isShadowingConfigured && (
           <ShadowingPlayer geminiApiKey={geminiApiKey} />
+        )}
+
+        {view === 'coaching' && isShadowingConfigured && (
+          <Coaching geminiApiKey={geminiApiKey} />
         )}
         
         {view === 'help' && (
