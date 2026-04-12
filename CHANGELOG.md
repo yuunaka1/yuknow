@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2026-04-12
+
+### ✨ Features
+- **Lesson Coaching**: 分析結果（LOG）を日付入りのマークダウンファイル（`yuknow_coaching_YYYY-MM-DD.md`）としてダウンロード・保存できる「EXPORT」機能を追加。
+
 ## [1.2.0] - 2026-04-12
 
 ### ✨ Features

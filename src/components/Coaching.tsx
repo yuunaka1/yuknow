@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Mic2, AlertTriangle, FileAudio } from 'lucide-react';
+import { Upload, Mic2, AlertTriangle, FileAudio, Download } from 'lucide-react';
 import { analyzeLessonAudioWithGemini } from '../utils/gemini';
 
 const MAX_FILE_SIZE_MB = 20;
@@ -38,6 +38,20 @@ export default function Coaching({ geminiApiKey }: { geminiApiKey?: string }) {
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const handleDownload = () => {
+    if (!report) return;
+    const blob = new Blob([report], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const dateStr = new Date().toISOString().split('T')[0];
+    a.download = `yuknow_coaching_${dateStr}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -119,8 +133,15 @@ export default function Coaching({ geminiApiKey }: { geminiApiKey?: string }) {
           padding: '2rem', backgroundColor: '#050505',
           border: '1px solid #003300', borderRadius: '4px'
         }}>
-          <h3 style={{ borderBottom: '1px dashed #005000', paddingBottom: '0.5rem', marginBottom: '1.5rem', color: '#fff' }}>
-            &gt; COACHING_REPORT.LOG
+          <h3 style={{ borderBottom: '1px dashed #005000', paddingBottom: '0.5rem', marginBottom: '1.5rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>&gt; COACHING_REPORT.LOG</span>
+            <button 
+              onClick={handleDownload} 
+              style={{ padding: '0.25rem 0.75rem', backgroundColor: '#002200', color: '#00ff41', border: '1px solid #005000', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}
+              title="Download as Markdown"
+            >
+              <Download size={14} /> EXPORT
+            </button>
           </h3>
           <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7', fontFamily: "'Fira Code', monospace", color: 'var(--text-primary)' }}>
             {/* Since simple markdown is returned, just pre-wrap is often perfect for CUI look */}
