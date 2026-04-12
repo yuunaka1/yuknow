@@ -9,10 +9,6 @@ export default function Quiz({ onComplete }: { onComplete: () => void }) {
   const [showAnswer, setShowAnswer] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadCards();
-  }, []);
-
   const loadCards = async () => {
     let due = await getDueCards();
     // Shuffle and pick up to 50 for this session
@@ -20,6 +16,10 @@ export default function Quiz({ onComplete }: { onComplete: () => void }) {
     setCards(due);
     setLoading(false);
   };
+
+  useEffect(() => {
+    loadCards();
+  }, []);
 
   const speak = useCallback((text: string) => {
     if ('speechSynthesis' in window) {
