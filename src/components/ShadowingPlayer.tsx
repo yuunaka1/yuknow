@@ -422,7 +422,7 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
             <select 
               value={targetLoops} 
               onChange={handleLoopTargetChange}
-              style={{ ...btnStyle, backgroundColor: '#0a0a00', appearance: 'none', paddingRight: '1rem', opacity: targetLoops === 0 ? 0.5 : 1 }}
+              style={{ ...btnStyle, backgroundColor: '#0a0a00', appearance: 'none', textAlign: 'center', opacity: targetLoops === 0 ? 0.5 : 1 }}
             >
               <option value={0} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>REPEAT: OFF</option>
               <option value={-1} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>REPEAT: INF</option>
@@ -441,7 +441,7 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
             <select 
               value={playbackRate} 
               onChange={changeSpeed}
-              style={{ ...btnStyle, backgroundColor: '#0a0a00', appearance: 'none', paddingRight: '2rem' }}
+              style={{ ...btnStyle, backgroundColor: '#0a0a00', appearance: 'none', textAlign: 'center' }}
             >
               <option value={0.75} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>0.75x SPD</option>
               <option value={0.80} style={{ backgroundColor: '#0a0a00', color: '#00ff41' }}>0.80x SPD</option>
