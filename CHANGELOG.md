@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.2] - 2026-04-12
+
+### 💄 UI/UX Improvements
+- **Shadowing**: `REPEAT` および `SPD` セレクトボックスの右側に空いていた余分な余白（padding）を削除し、テキストが他ボタンと同様に中央揃えになるようデザインを統一しました。
+
 ## [1.2.1] - 2026-04-12
 
 ### ✨ Features
