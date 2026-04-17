@@ -179,7 +179,9 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
             model: modelOverride,
             generationConfig: {
               responseModalities: ["AUDIO"],
-            }
+            },
+            inputAudioTranscription: {},
+            outputAudioTranscription: {}
           }
         };
         ws.send(JSON.stringify(setupMsg));
@@ -263,6 +265,17 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
                      addLog(textBuf, "model");
                    }
                 }
+             }
+
+             // Transcriptions
+             if (content.inputTranscription && content.inputTranscription.text) {
+                // User's voice transcription
+                addLog(content.inputTranscription.text, "user");
+             }
+             
+             if (content.outputTranscription && content.outputTranscription.text) {
+                // Model's voice transcription (if output is exclusively audio)
+                addLog(content.outputTranscription.text, "model");
              }
              
              // Turn complete
