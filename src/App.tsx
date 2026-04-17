@@ -10,7 +10,7 @@ import LiveTranslation from './components/LiveTranslation';
 import readmeText from '../README.md?raw';
 import packageJson from '../package.json';
 
-type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'translation' | 'help';
+type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'translation' | 'monologue2' | 'help';
 
 function App() {
   const [view, setView] = useState<View>('settings');
@@ -64,6 +64,13 @@ function App() {
             disabled={!geminiApiKey}
           >
             <Globe size={18} /> Monologue
+          </button>
+          <button 
+            className={`btn ${view === 'monologue2' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setView('monologue2')}
+            disabled={!geminiApiKey}
+          >
+            <Globe size={18} /> Monologue 2
           </button>
           <button 
             className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
@@ -129,7 +136,11 @@ function App() {
         )}
         
         {view === 'translation' && geminiApiKey && (
-          <LiveTranslation geminiApiKey={geminiApiKey} modelName={translationModel} />
+          <LiveTranslation geminiApiKey={geminiApiKey} modelName={translationModel} title="MONOLOGUE" />
+        )}
+        
+        {view === 'monologue2' && geminiApiKey && (
+          <LiveTranslation geminiApiKey={geminiApiKey} modelName="gemini-3.1-flash-tts-preview" title="MONOLOGUE 2 (3.1 TTS)" />
         )}
         
         {view === 'help' && (

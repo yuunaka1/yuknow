@@ -19,7 +19,7 @@ interface LogEntry {
   type: 'user' | 'bot' | 'system';
 }
 
-export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApiKey: string, modelName: string }) {
+export default function LiveTranslation({ geminiApiKey, modelName, title = "MONOLOGUE" }: { geminiApiKey: string, modelName: string, title?: string }) {
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -290,7 +290,7 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
   return (
     <div className="animate-fade-in glass-panel" style={{ padding: 'clamp(1rem, 4vw, 2rem)' }}>
       <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#00ff41' }}>
-        <Globe size={24} /> MONOLOGUE
+        <Globe size={24} /> {title}
       </h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
         Real-time Voice-to-Voice Multimodal Interface. Powered by {modelName}.

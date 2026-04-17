@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.8] - 2026-04-17
+
+### ✨ Features
+- **Monologue 2 (Preview)**: 応答速度やTTS（Text-to-Speech）の品質比較・検証のため、試験モデルである `gemini-3.1-flash-tts-preview` を使用して動作する「MONOLOGUE 2」モードをヘッダーメニューに新設しました。既存のMONOLOGUE機能はそのまま利用可能です。
+
 ## [1.5.7] - 2026-04-17
 
 ### ✨ Features
