@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.17] - 2026-04-17
+
+### 🐛 Bug Fixes
+- **State Management**: `useLocalStorage` カスタムフック内で関数型の状態更新 (`setLogs(prev => ...)`) を行った際に、Reactのクロージャ機能によって過去のステート(Stale State)にフォールバックしてしまい、連続したログの記録（日本語と英語の記録など）で上書きが発生してしまう潜在的なバグを修正しました。
+
 ## [1.5.16] - 2026-04-17
 
 ### ✨ Features
