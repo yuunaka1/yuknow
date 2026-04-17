@@ -134,6 +134,7 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
   const recorderRef = useRef<AudioRecorder | null>(null);
   const playerRef = useRef<AudioStreamPlayer | null>(null);
   const logEndRef = useRef<HTMLDivElement | null>(null);
+  const wakeLockRef = useRef<any>(null);
 
   const modelOverride = "models/gemini-3.1-flash-live-preview";
 
@@ -183,6 +184,16 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
       setErrorDetails("");
       playerRef.current = new AudioStreamPlayer();
       recorderRef.current = new AudioRecorder();
+
+      // Request Screen Wake Lock to prevent screen sleep
+      if ('wakeLock' in navigator) {
+        try {
+          wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+          addLog("Screen wake lock acquired.", "system");
+        } catch (err: any) {
+          console.warn("Wake lock failed:", err);
+        }
+      }
 
       // 1. Establish WebSocket
       const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${geminiApiKey}`;
@@ -331,6 +342,12 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
+    }
+    
+    // Release Screen Wake Lock
+    if (wakeLockRef.current) {
+      wakeLockRef.current.release().catch(console.warn);
+      wakeLockRef.current = null;
     }
     
     setAppState(prev => (prev !== 'idle' && prev !== 'error' ? 'idle' : prev));
