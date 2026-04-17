@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.6] - 2026-04-17
+
+### 🐛 Bug Fixes
+- **Bluetooth Headset Support**: Bluetoothイヤホンで接続した際にマイクの音声が拾えなかったり、大きなタイムラグ（遅延）が発生する問題を修正しました。
+  - OSやブラウザの強制サンプリングによる遅延を回避するため、入力ソースのレートをハードウェアネイティブに任せ、アプリ内部で高速なソフトウェア・ダウンサンプリング（16kHz化）を行うよう録音処理を拡張しました。
+
 ## [1.5.5] - 2026-04-17
 
 ### 🐛 Bug Fixes

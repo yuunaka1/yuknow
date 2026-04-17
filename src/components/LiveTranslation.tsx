@@ -136,14 +136,14 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           channelCount: 1,
-          sampleRate: SAMPLE_RATE,
           echoCancellation: true,
           noiseSuppression: true
         } 
       });
       mediaStreamRef.current = stream;
 
-      const actx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE });
+      // Do NOT force sampleRate here. Let the browser use the Bluetooth hardware's native rate to avoid massive OS resampler lag.
+      const actx = new (window.AudioContext || (window as any).webkitAudioContext)();
       audioContextRef.current = actx;
       const source = actx.createMediaStreamSource(stream);
 
@@ -154,10 +154,23 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
       // Fixing `onaudioprocess` base64 encoding logic to prevent call stack issues
       scriptProcessor.onaudioprocess = (e) => {
         const inputData = e.inputBuffer.getChannelData(0);
-        const pcmData = new Int16Array(inputData.length);
         
-        for (let i = 0; i < inputData.length; i++) {
-          let s = Math.max(-1, Math.min(1, inputData[i]));
+        // Software Downsample to 16kHz for Gemini
+        const inRate = actx.sampleRate;
+        const outRate = SAMPLE_RATE;
+        const ratio = inRate / outRate;
+        const outLength = Math.round(inputData.length / ratio);
+        const pcmData = new Int16Array(outLength);
+        
+        for (let i = 0; i < outLength; i++) {
+          const inIndex = i * ratio;
+          const indexFloor = Math.floor(inIndex);
+          const indexCeil = Math.min(inputData.length - 1, indexFloor + 1);
+          const weight = inIndex - indexFloor;
+          
+          // Fast linear interpolation
+          const sample = (1 - weight) * inputData[indexFloor] + weight * inputData[indexCeil];
+          let s = Math.max(-1, Math.min(1, sample));
           pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
         }
 
