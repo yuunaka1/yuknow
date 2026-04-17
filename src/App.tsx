@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Settings, BookOpen, BrainCircuit, Headphones, HelpCircle, MessageSquare } from 'lucide-react';
+import { Settings, BookOpen, BrainCircuit, Headphones, HelpCircle, MessageSquare, Globe } from 'lucide-react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import SettingsPanel from './components/SettingsPanel';
 import Dashboard from './components/Dashboard';
 import Quiz from './components/Quiz';
 import ShadowingPlayer from './components/ShadowingPlayer';
 import Coaching from './components/Coaching';
+import LiveTranslation from './components/LiveTranslation';
 import readmeText from '../README.md?raw';
 
-type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'help';
+type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'translation' | 'help';
 
 function App() {
   const [view, setView] = useState<View>('settings');
@@ -17,6 +18,7 @@ function App() {
   const [geminiApiKey, setGeminiApiKey] = useLocalStorage('uknow_gemini_api_key', '');
   const [docId, setDocId] = useLocalStorage('uknow_doc_id', '');
   const [geminiModel, setGeminiModel] = useLocalStorage('uknow_gemini_model', 'gemini-3.1-flash-lite-preview');
+  const [translationModel, setTranslationModel] = useLocalStorage('uknow_translation_model', 'gemini-2.5-flash-native-audio-preview-12-2025');
   
   const isFlashcardConfigured = googleClientId && geminiApiKey && docId;
   const isShadowingConfigured = !!geminiApiKey;
@@ -53,6 +55,13 @@ function App() {
             <MessageSquare size={18} /> Coaching
           </button>
           <button 
+            className={`btn ${view === 'translation' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setView('translation')}
+            disabled={!geminiApiKey}
+          >
+            <Globe size={18} /> Translation
+          </button>
+          <button 
             className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
             onClick={() => setView('dashboard')}
             disabled={!isFlashcardConfigured}
@@ -86,6 +95,8 @@ function App() {
             setGeminiApiKey={setGeminiApiKey}
             geminiModel={geminiModel}
             setGeminiModel={setGeminiModel}
+            translationModel={translationModel}
+            setTranslationModel={setTranslationModel}
             docId={docId}
             setDocId={setDocId}
           />
@@ -111,6 +122,10 @@ function App() {
 
         {view === 'coaching' && isShadowingConfigured && (
           <Coaching geminiApiKey={geminiApiKey} geminiModel={geminiModel} />
+        )}
+        
+        {view === 'translation' && geminiApiKey && (
+          <LiveTranslation geminiApiKey={geminiApiKey} modelName={translationModel} />
         )}
         
         {view === 'help' && (
