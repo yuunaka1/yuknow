@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.1] - 2026-04-17
+
+### 💄 UI/UX Improvements
+- **Monologue Mode**: UIのサブタイトルからモデルのバージョン表記を削減し、「Powered by Gemini」というシンプルな表示へ微修正しました。
+
 ## [1.5.0] - 2026-04-17
 
 ### ✨ Features
