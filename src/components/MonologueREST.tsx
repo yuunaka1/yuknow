@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Globe, RefreshCcw, Loader } from 'lucide-react';
+import { Mic, MicOff, Globe, RefreshCcw, Loader, Trash2 } from 'lucide-react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 function base64ToArrayBuffer(base64: string) {
   const binaryString = atob(base64);
@@ -19,7 +20,7 @@ interface LogEntry {
 export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.1-flash-lite-preview", modelName, title = "MONOLOGUE 2 (REST)" }: { geminiApiKey: string, textModelName?: string, modelName: string, title?: string }) {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logs, setLogs] = useLocalStorage<LogEntry[]>('uknow_monologue2_logs', []);
   
   const recognitionRef = useRef<any>(null);
   const playbackAudioContextRef = useRef<AudioContext | null>(null);
@@ -28,7 +29,16 @@ export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.
   const isProcessingRef = useRef(false);
 
   const addLog = (text: string, type: 'user' | 'bot' | 'system') => {
-    setLogs(prev => [...prev, { id: Math.random().toString(), text, type }]);
+    setLogs(prev => {
+      const newLogs = [...prev, { id: Math.random().toString(), text, type }];
+      return newLogs.slice(-100); // 過去100件まで保持
+    });
+  };
+
+  const clearLogs = () => {
+    if (window.confirm("Do you want to clear the logs?")) {
+      setLogs([]);
+    }
   };
 
   useEffect(() => {
@@ -157,10 +167,9 @@ export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.
       addLog(englishText.trim(), "bot");
 
       // Step 2: Convert to TTS
-      const ttsPrompt = `Speak the following English text slowly and clearly: ${englishText.trim()}`;
       const ttsPayload = {
         contents: [
-          { role: "user", parts: [{ text: ttsPrompt }] }
+          { role: "user", parts: [{ text: englishText.trim() }] }
         ],
         generationConfig: {
           responseModalities: ["AUDIO"],
@@ -304,9 +313,19 @@ export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.
         overflowY: 'auto',
         fontFamily: "'Fira Code', monospace"
       }}>
-        <h3 style={{ fontSize: '0.9rem', color: '#005000', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <RefreshCcw size={14} /> REST_PIPELINE_LOG
-        </h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h3 style={{ fontSize: '0.9rem', color: '#005000', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <RefreshCcw size={14} /> REST_PIPELINE_LOG
+          </h3>
+          {logs.length > 0 && (
+            <button 
+              onClick={clearLogs}
+              style={{ backgroundColor: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem' }}
+            >
+              <Trash2 size={12} /> CLEAR
+            </button>
+          )}
+        </div>
         
         {logs.length === 0 ? (
           <div style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>&gt; Ready waiting for microphone input...</div>
