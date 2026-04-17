@@ -201,7 +201,7 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
             },
             systemInstruction: {
               parts: [{
-                text: "You are a real-time interpreter. Translate everything the user says in Japanese into natural spoken English. Speak only the English translation. Do not answer questions, do not add filler words, and do not converse. Just echo the translated English."
+                text: "You are a real-time bilingual interpreter. If the user speaks Japanese, translate it into natural spoken English. If the user speaks English, translate it into natural spoken Japanese. Speak only the exact translation. Do not answer questions, do not add filler words, and do not converse. Just echo the translated text in the target language."
               }]
             },
             inputAudioTranscription: {},
