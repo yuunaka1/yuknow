@@ -93,7 +93,12 @@ class AudioRecorder {
         pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
       }
       
-      const chunk = btoa(String.fromCharCode(...new Uint8Array(pcm16.buffer)));
+      const bytes = new Uint8Array(pcm16.buffer);
+      let binary = "";
+      for (let i = 0; i < bytes.byteLength; i++) {
+         binary += String.fromCharCode(bytes[i]);
+      }
+      const chunk = btoa(binary);
       onPcmChunk(chunk);
     };
   }
@@ -161,7 +166,7 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
       recorderRef.current = new AudioRecorder();
 
       // 1. Establish WebSocket
-      const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${geminiApiKey}`;
+      const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${geminiApiKey}`;
       const ws = new WebSocket(url);
       wsRef.current = ws;
 
@@ -183,8 +188,10 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
       ws.onclose = (event) => {
         stopSession();
         if (event.code !== 1000) { // Disconnected abnormally
-           addLog(`Disconnected from API (${event.code})`, "system");
-           setErrorDetails(`Disconnect code: ${event.code}`);
+           let detail = "";
+           if (event.code === 1007) detail = "(1007: Unsupported Payload/Model Mismatch. Check if the model supports Live API.)";
+           addLog(`Disconnected from API (${event.code}) ${detail}`, "system");
+           setErrorDetails(`Disconnect code: ${event.code} ${detail}`);
            setAppState('error');
         } else {
            addLog("Session ended gracefully.", "system");
