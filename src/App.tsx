@@ -7,6 +7,7 @@ import Quiz from './components/Quiz';
 import ShadowingPlayer from './components/ShadowingPlayer';
 import Coaching from './components/Coaching';
 import LiveTranslation from './components/LiveTranslation';
+import MonologueREST from './components/MonologueREST';
 import readmeText from '../README.md?raw';
 import packageJson from '../package.json';
 
@@ -140,7 +141,7 @@ function App() {
         )}
         
         {view === 'monologue2' && geminiApiKey && (
-          <LiveTranslation geminiApiKey={geminiApiKey} modelName="gemini-3.1-flash-tts-preview" title="MONOLOGUE 2 (3.1 TTS)" />
+          <MonologueREST geminiApiKey={geminiApiKey} modelName="gemini-3.1-flash-tts-preview" title="MONOLOGUE 2 (3.1 TTS)" />
         )}
         
         {view === 'help' && (

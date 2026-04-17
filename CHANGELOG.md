@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.9] - 2026-04-17
+
+### ✨ Features
+- **Monologue 2 (REST Pipeline)**: WebSocket 等のストリーミング双方向通信を使わず、ブラウザ標準の音声認識機能（WebkitSpeechRecognition）と Gemini REST API を逐次利用する「完全に安定したパイプライン版」として実装を完全に刷新しました。
+  - マイクトラブルやBluetooth接続由来のシステム遅延を受けにくくなり、単発での TTS (Text-to-Speech) 品質を検証しやすくなりました。
+  - 翻訳中の `PROCESSING...` 状態を視覚化し、より確実なレスポンスが期待できます。
+
 ## [1.5.8] - 2026-04-17
 
 ### ✨ Features
