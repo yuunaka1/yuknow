@@ -72,7 +72,7 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
             }
           },
           systemInstruction: {
-            parts: [{ text: "You are a professional, real-time voice translator. Listen to the Japanese speech from the user, translate it into natural, flowing English, and output ONLY the spoken English translation. Do not add conversational filler, do not reply as an assistant, just translate." }]
+            parts: [{ text: "You are a professional, real-time voice translator. Listen to the Japanese speech from the user, translate it into natural, flowing English, and output ONLY the spoken English translation. Speak slowly and clearly so the user can easily catch the pronunciation. Do not add conversational filler, do not reply as an assistant, just translate." }]
           }
         }
       };
@@ -282,18 +282,24 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
         <div style={{ width: '1px', backgroundColor: '#005000', margin: '0 0.5rem' }}></div>
 
         {isConnected && (
-          <button 
-            onClick={isRecording ? stopRecording : startRecording} 
-            style={{ 
-              ...btnStyle, 
-              color: isRecording ? '#ff3333' : '#00ff41',
-              borderColor: isRecording ? '#ff3333' : '#00ff41',
-              backgroundColor: isRecording ? 'rgba(255,51,51,0.1)' : 'transparent'
-            }}
-          >
-            {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
-            {isRecording ? 'MUTE MIC' : 'LIVE MIC'}
-          </button>
+          <>
+            <button 
+              onClick={isRecording ? stopRecording : startRecording} 
+              style={{ 
+                ...btnStyle, 
+                color: isRecording ? '#ff3333' : '#00ff41',
+                borderColor: isRecording ? '#ff3333' : '#00ff41',
+                backgroundColor: isRecording ? 'rgba(255,51,51,0.1)' : 'transparent'
+              }}
+            >
+              {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
+              {isRecording ? 'TURN OFF MIC' : 'TURN ON MIC'}
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: 'auto', fontWeight: 'bold', color: isRecording ? '#ff3333' : 'var(--text-tertiary)' }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: isRecording ? '#ff3333' : '#333', boxShadow: isRecording ? '0 0 8px #ff3333' : 'none', transition: 'all 0.3s' }}></div>
+              {isRecording ? 'RECORDING...' : 'MIC OFF'}
+            </div>
+          </>
         )}
       </div>
 

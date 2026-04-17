@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.4] - 2026-04-17
+
+### 💄 UI/UX Improvements
+- **Monologue Mode (Prompt)**: よりリスニングしやすいように、Geminiが少しゆっくりと英語をしゃべるようにシステムプロンプトを調整しました。
+- **Monologue Mode (UI)**: マイク録音中であることが視覚的に分かりやすいよう、「RECORDING...」というインジケータ（録音ランプ）を追加し、ボタンの文言も分かりやすく整理しました。
+
 ## [1.5.3] - 2026-04-17
 
 ### 💄 UI/UX Improvements
