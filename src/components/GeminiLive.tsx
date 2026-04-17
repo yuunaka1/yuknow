@@ -166,7 +166,7 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
       recorderRef.current = new AudioRecorder();
 
       // 1. Establish WebSocket
-      const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${geminiApiKey}`;
+      const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${geminiApiKey}`;
       const ws = new WebSocket(url);
       wsRef.current = ws;
 
@@ -226,7 +226,7 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
                if (wsRef.current?.readyState === WebSocket.OPEN) {
                  const audioMessage = {
                    realtimeInput: {
-                     mediaChunks: [{ mimeType: "audio/pcm;rate=16000", data: base64pcm }]
+                     audio: { mimeType: "audio/pcm;rate=16000", data: base64pcm }
                    }
                  };
                  wsRef.current.send(JSON.stringify(audioMessage));
