@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.2] - 2026-04-17
+
+### 🐛 Bug Fixes
+- **Audio Playback**: Gemini Live APIからの音声出力がスロー再生（低ピッチ）になってしまう問題を修正しました。（出力側のPCMが `24kHz` であることを正しくパースして再生バッファに適用するように改善しました）
+
 ## [1.5.1] - 2026-04-17
 
 ### 💄 UI/UX Improvements

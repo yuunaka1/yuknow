@@ -95,7 +95,7 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
              addLog(part.text, "bot");
           }
           if (part.inlineData) {
-             playAudioChunk(part.inlineData.data);
+             playAudioChunk(part.inlineData.data, part.inlineData.mimeType);
           }
         }
       } else if (data.serverContent?.turnComplete) {
@@ -205,16 +205,19 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
     addLog("Microphone muted.", "system");
   };
 
-  const playAudioChunk = async (base64Data: string) => {
+  const playAudioChunk = async (base64Data: string, mimeType: string) => {
      if (!audioContextRef.current) {
        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE });
      }
      const actx = audioContextRef.current;
      
+     const matchRate = mimeType.match(/rate=(\d+)/);
+     const outRate = matchRate ? parseInt(matchRate[1]) : 24000;
+
      const arrayBuffer = base64ToArrayBuffer(base64Data);
      const int16Array = new Int16Array(arrayBuffer);
      
-     const audioBuffer = actx.createBuffer(1, int16Array.length, SAMPLE_RATE);
+     const audioBuffer = actx.createBuffer(1, int16Array.length, outRate);
      const channelData = audioBuffer.getChannelData(0);
      for (let i = 0; i < int16Array.length; i++) {
          channelData[i] = int16Array[i] / 32768.0;
