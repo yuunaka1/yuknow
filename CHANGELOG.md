@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-04-17
+
+### 🔒 Security
+- **SECURITY.md**: 脆弱性情報の報告手順やサポート対象バージョンを一覧で確認できるよう `SECURITY.md` を追加しました (Resolves #8)
+
+### 📦 Dependencies
+- **npm deps**: Dependabot による自動アップグレードPRをまとめてマージし、依存パッケージ（`react@19.2.5`, `react-dom@19.2.5`, `vite@8.0.8`, `lucide-react@1.8.0`, `typescript-eslint@8.58.2`）を更新しました。
+
 ## [1.2.2] - 2026-04-12
 
 ### 💄 UI/UX Improvements
