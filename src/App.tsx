@@ -16,6 +16,7 @@ function App() {
   const [googleClientId, setGoogleClientId] = useLocalStorage('uknow_google_client_id', '');
   const [geminiApiKey, setGeminiApiKey] = useLocalStorage('uknow_gemini_api_key', '');
   const [docId, setDocId] = useLocalStorage('uknow_doc_id', '');
+  const [geminiModel, setGeminiModel] = useLocalStorage('uknow_gemini_model', 'gemini-3.1-flash-lite-preview');
   
   const isFlashcardConfigured = googleClientId && geminiApiKey && docId;
   const isShadowingConfigured = !!geminiApiKey;
@@ -83,6 +84,8 @@ function App() {
             setGoogleClientId={setGoogleClientId}
             geminiApiKey={geminiApiKey}
             setGeminiApiKey={setGeminiApiKey}
+            geminiModel={geminiModel}
+            setGeminiModel={setGeminiModel}
             docId={docId}
             setDocId={setDocId}
           />
@@ -92,6 +95,7 @@ function App() {
           <Dashboard
             googleClientId={googleClientId}
             geminiApiKey={geminiApiKey}
+            geminiModel={geminiModel}
             docId={docId}
             onStartQuiz={() => setView('quiz')}
           />
@@ -102,11 +106,11 @@ function App() {
         )}
 
         {view === 'shadowing' && isShadowingConfigured && (
-          <ShadowingPlayer geminiApiKey={geminiApiKey} />
+          <ShadowingPlayer geminiApiKey={geminiApiKey} geminiModel={geminiModel} />
         )}
 
         {view === 'coaching' && isShadowingConfigured && (
-          <Coaching geminiApiKey={geminiApiKey} />
+          <Coaching geminiApiKey={geminiApiKey} geminiModel={geminiModel} />
         )}
         
         {view === 'help' && (

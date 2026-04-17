@@ -9,11 +9,12 @@ import type { SRItem } from '../utils/db';
 interface DashboardProps {
   googleClientId: string;
   geminiApiKey: string;
+  geminiModel: string;
   docId: string;
   onStartQuiz: () => void;
 }
 
-export default function Dashboard({ googleClientId, geminiApiKey, docId, onStartQuiz }: DashboardProps) {
+export default function Dashboard({ googleClientId, geminiApiKey, geminiModel, docId, onStartQuiz }: DashboardProps) {
   const { token, isReady, login, logout } = useGoogleAuth(googleClientId);
   const [syncing, setSyncing] = useState(false);
   const [dueCards, setDueCards] = useState<SRItem[]>([]);
@@ -39,8 +40,8 @@ export default function Dashboard({ googleClientId, geminiApiKey, docId, onStart
       const text = await fetchGoogleDocText(docId, token);
       if (!text) throw new Error("Document is empty.");
       
-      setSyncMessage("Parsing vocabulary with Gemini 3.1 Flash Lite Preview...");
-      const items = await parseVocabularyWithGemini(geminiApiKey, text);
+      setSyncMessage(`Parsing vocabulary with ${geminiModel}...`);
+      const items = await parseVocabularyWithGemini(geminiApiKey, text, geminiModel);
       
       if (items.length > 0) {
         const addedCount = await addCards(items);

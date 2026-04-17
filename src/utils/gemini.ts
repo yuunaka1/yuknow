@@ -8,9 +8,9 @@ export interface VocabItem {
   exampleSentence: string;
 }
 
-export async function parseVocabularyWithGemini(apiKey: string, text: string): Promise<VocabItem[]> {
+export async function parseVocabularyWithGemini(apiKey: string, text: string, modelName: string): Promise<VocabItem[]> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+  const model = genAI.getGenerativeModel({ model: modelName });
 
   const prompt = `
 以下のテキストは英語学習のメモです。このテキストから、学習すべき「英単語」または「フレーズ」を抽出し、JSON形式の配列で出力してください。
@@ -67,9 +67,9 @@ function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
-export async function transcribeAudioWithGemini(apiKey: string, audioBlob: Blob): Promise<string> {
+export async function transcribeAudioWithGemini(apiKey: string, audioBlob: Blob, modelName: string): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+  const model = genAI.getGenerativeModel({ model: modelName });
   
   const base64data = await blobToBase64(audioBlob);
   const mimeType = audioBlob.type || 'audio/mp4';
@@ -94,9 +94,9 @@ export async function transcribeAudioWithGemini(apiKey: string, audioBlob: Blob)
   }
 }
 
-export async function evaluateShadowingWithGemini(apiKey: string, sourceBlob: Blob, recordedBlob: Blob): Promise<string> {
+export async function evaluateShadowingWithGemini(apiKey: string, sourceBlob: Blob, recordedBlob: Blob, modelName: string): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+  const model = genAI.getGenerativeModel({ model: modelName });
   
   const sourceBase64 = await blobToBase64(sourceBlob);
   const recordedBase64 = await blobToBase64(recordedBlob);
@@ -134,9 +134,9 @@ TRANSCRIPT: [1番目の音声の文字起こし]
   }
 }
 
-export async function analyzeLessonAudioWithGemini(apiKey: string, audioBlob: Blob): Promise<string> {
+export async function analyzeLessonAudioWithGemini(apiKey: string, audioBlob: Blob, modelName: string): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+  const model = genAI.getGenerativeModel({ model: modelName });
   
   const base64data = await blobToBase64(audioBlob);
   const mimeType = audioBlob.type || 'audio/mp4';

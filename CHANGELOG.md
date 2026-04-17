@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-04-17
+
+### ✨ Features
+- **Settings**: Geminiの使用モデルをSettings画面から自由に設定できるようになりました（デフォルト: `gemini-3.1-flash-lite-preview`, `gemini-3.1-pro-preview` などの最新モデルも選択可能）(Resolves #9)
+
 ## [1.3.0] - 2026-04-17
 
 ### 🔒 Security

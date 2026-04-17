@@ -3,6 +3,8 @@ interface SettingsPanelProps {
   setGoogleClientId: (val: string) => void;
   geminiApiKey: string;
   setGeminiApiKey: (val: string) => void;
+  geminiModel: string;
+  setGeminiModel: (val: string) => void;
   docId: string;
   setDocId: (val: string) => void;
 }
@@ -10,6 +12,7 @@ interface SettingsPanelProps {
 export default function SettingsPanel({
   googleClientId, setGoogleClientId,
   geminiApiKey, setGeminiApiKey,
+  geminiModel, setGeminiModel,
   docId, setDocId
 }: SettingsPanelProps) {
   
@@ -50,7 +53,29 @@ export default function SettingsPanel({
           onChange={(e) => setGeminiApiKey(e.target.value)}
         />
         <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
-          Get this from Google AI Studio. We use gemini-3.1-flash-lite-preview.
+          Get this from Google AI Studio.
+        </p>
+      </div>
+
+      <div className="form-group">
+        <label className="form-label" htmlFor="geminiModel">
+          Gemini Model
+        </label>
+        <select 
+          id="geminiModel"
+          className="form-input" 
+          value={geminiModel}
+          onChange={(e) => setGeminiModel(e.target.value)}
+          style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+        >
+          <option value="gemini-3.1-flash-lite-preview">gemini-3.1-flash-lite-preview (Fast / Default)</option>
+          <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview (Premium)</option>
+          <option value="gemini-3-flash-preview">gemini-3-flash-preview</option>
+          <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+          <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite</option>
+        </select>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
+          Select the Gemini model you want to use for the AI features.
         </p>
       </div>
 

@@ -5,7 +5,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { transcribeAudioWithGemini, evaluateShadowingWithGemini } from '../utils/gemini';
 import { sliceAudioFileToWav } from '../utils/audioEncoder';
 
-export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: string }) {
+export default function ShadowingPlayer({ geminiApiKey, geminiModel }: { geminiApiKey?: string, geminiModel: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   
@@ -311,7 +311,7 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
     setIsTranscribing(true);
     setTranscription(null);
     try {
-      const result = await transcribeAudioWithGemini(geminiApiKey, recordedBlob);
+      const result = await transcribeAudioWithGemini(geminiApiKey, recordedBlob, geminiModel);
       setTranscription(result);
     } catch (err) {
       console.error(err);
@@ -327,7 +327,7 @@ export default function ShadowingPlayer({ geminiApiKey }: { geminiApiKey?: strin
     setEvaluation(null);
     try {
       const sourceWav = await sliceAudioFileToWav(file, shadowStartTime, shadowEndTime);
-      const result = await evaluateShadowingWithGemini(geminiApiKey, sourceWav, recordedBlob);
+      const result = await evaluateShadowingWithGemini(geminiApiKey, sourceWav, recordedBlob, geminiModel);
       setEvaluation(result);
     } catch (err) {
       console.error(err);

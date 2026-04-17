@@ -4,7 +4,7 @@ import { analyzeLessonAudioWithGemini } from '../utils/gemini';
 
 const MAX_FILE_SIZE_MB = 20;
 
-export default function Coaching({ geminiApiKey }: { geminiApiKey?: string }) {
+export default function Coaching({ geminiApiKey, geminiModel }: { geminiApiKey?: string, geminiModel: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [report, setReport] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export default function Coaching({ geminiApiKey }: { geminiApiKey?: string }) {
     setIsAnalyzing(true);
     setErrorMsg(null);
     try {
-      const result = await analyzeLessonAudioWithGemini(geminiApiKey, file);
+      const result = await analyzeLessonAudioWithGemini(geminiApiKey, file, geminiModel);
       setReport(result);
     } catch (err) {
       console.error(err);
