@@ -10,7 +10,7 @@ interface LogEntry {
   type: 'user' | 'bot' | 'system';
 }
 
-export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.1-flash-lite-preview", modelName, title = "MONOLOGUE 2 (REST)" }: { geminiApiKey: string, textModelName?: string, modelName: string, title?: string }) {
+export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.1-flash-lite-preview", title = "MONOLOGUE 2 (REST)" }: { geminiApiKey: string, textModelName?: string, title?: string }) {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [logs, setLogs] = useLocalStorage<LogEntry[]>('uknow_monologue2_logs', []);

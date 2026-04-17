@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.19] - 2026-04-17
+
+### 🐛 Bug Fixes
+- **Code Quality**: `MonologueREST.tsx` に不要に残っていた `modelName` prop 定義や、`LogEntry` インターフェースの微細な TypeScript エラーを修正し、デプロイ用ビルドのLintルール警告を完全に解消しました。
+
 ## [1.5.18] - 2026-04-17
 
 ### ✨ Features
