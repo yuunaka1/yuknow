@@ -146,12 +146,7 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [logs]);
 
-  // Clean up on unmount
-  useEffect(() => {
-    return () => {
-      stopSession();
-    };
-  }, []);
+
 
   const startSession = async () => {
     if (!geminiApiKey) {
@@ -282,7 +277,7 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
     }
   };
 
-  const stopSession = () => {
+  const stopSession = useCallback(() => {
     recorderRef.current?.stop();
     recorderRef.current = null;
     
@@ -294,10 +289,15 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
       wsRef.current = null;
     }
     
-    if (appState !== 'idle' && appState !== 'error') {
-       setAppState('idle');
-    }
-  };
+    setAppState(prev => (prev !== 'idle' && prev !== 'error' ? 'idle' : prev));
+  }, []);
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      stopSession();
+    };
+  }, [stopSession]);
 
 
   const btnBaseStyles = {
