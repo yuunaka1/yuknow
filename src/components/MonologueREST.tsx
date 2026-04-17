@@ -119,7 +119,7 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
     setIsProcessing(true);
     isProcessingRef.current = true;
     try {
-      const prompt = `You are a professional voice translator. Translate the following Japanese text into natural, flowing English. Speak slowly and clearly. Output ONLY the English translation. \n\nInput: ${japaneseText}`;
+      const prompt = `You are a professional voice translator. Translate the following Japanese text into natural, flowing English. Speak slowly and clearly. You MUST output the English translation as text alongside the audio. \n\nInput: ${japaneseText}`;
       
       const payload = {
         contents: [
@@ -150,11 +150,21 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
 
       const data = await response.json();
       
+      let receivedText = "";
       if (data.candidates && data.candidates[0].content.parts) {
         for (const part of data.candidates[0].content.parts) {
           if (part.text) {
-            addLog(part.text, "bot");
+            receivedText += part.text;
           }
+        }
+        
+        if (receivedText.trim()) {
+          addLog(receivedText.trim(), "bot");
+        } else {
+          addLog("[ 音声のみ返却されました (テキストデータ無し) ]", "system");
+        }
+
+        for (const part of data.candidates[0].content.parts) {
           if (part.inlineData) {
             await playAudio(part.inlineData.data, part.inlineData.mimeType);
           }
