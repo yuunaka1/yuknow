@@ -68,7 +68,7 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
     recognition.onend = () => {
       // Auto-restart if we are in an active session and NOT currently processing Gemini audio
       if (isActiveSessionRef.current && !isProcessingRef.current) {
-        try { recognition.start(); } catch {}
+        try { recognition.start(); } catch { /* ignore */ }
       } else if (!isActiveSessionRef.current) {
         setIsRecording(false);
       }
@@ -88,6 +88,7 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
         playbackAudioContextRef.current.close().catch(console.error);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startListening = () => {
@@ -161,15 +162,16 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
       } else {
         addLog("No valid output received from Gemini.", "system");
       }
-    } catch (err: any) {
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       console.error(err);
-      addLog(`Error: ${err.message}`, "system");
+      addLog(`Error: ${errorMessage}`, "system");
     } finally {
       setIsProcessing(false);
       isProcessingRef.current = false;
       // Restart listening automatically if session is still active
       if (isActiveSessionRef.current) {
-        try { recognitionRef.current?.start(); } catch {}
+        try { recognitionRef.current?.start(); } catch { /* ignore */ }
       }
     }
   };

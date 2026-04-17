@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.13] - 2026-04-17
+
+### 🐛 Bug Fixes
+- **Code Quality**: `MonologueREST.tsx` 内で不要な `any` キャストを使用していた箇所や、いくつかの空のブロック文および React Hook 依存関係に関する TypeScript / ESLint の警告・エラーを全て解消しました。
+
 ## [1.5.12] - 2026-04-17
 
 ### ✨ Features
