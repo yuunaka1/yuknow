@@ -26,6 +26,7 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
   
   const wsRef = useRef<WebSocket | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const playbackAudioContextRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
   const nextPlayTimeRef = useRef<number>(0);
@@ -122,6 +123,10 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
       wsRef.current = null;
     }
     stopRecording();
+    if (playbackAudioContextRef.current) {
+      playbackAudioContextRef.current.close().catch(console.error);
+      playbackAudioContextRef.current = null;
+    }
     setIsConnected(false);
   };
 
@@ -199,17 +204,16 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
     if (audioContextRef.current) {
       audioContextRef.current.close().catch(console.error);
       audioContextRef.current = null;
-      nextPlayTimeRef.current = 0;
     }
     setIsRecording(false);
     addLog("Microphone muted.", "system");
   };
 
   const playAudioChunk = async (base64Data: string, mimeType: string) => {
-     if (!audioContextRef.current) {
-       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE });
+     if (!playbackAudioContextRef.current) {
+       playbackAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
      }
-     const actx = audioContextRef.current;
+     const pactx = playbackAudioContextRef.current;
      
      const matchRate = mimeType.match(/rate=(\d+)/);
      const outRate = matchRate ? parseInt(matchRate[1]) : 24000;
@@ -217,18 +221,19 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
      const arrayBuffer = base64ToArrayBuffer(base64Data);
      const int16Array = new Int16Array(arrayBuffer);
      
-     const audioBuffer = actx.createBuffer(1, int16Array.length, outRate);
+     const audioBuffer = pactx.createBuffer(1, int16Array.length, outRate);
      const channelData = audioBuffer.getChannelData(0);
      for (let i = 0; i < int16Array.length; i++) {
          channelData[i] = int16Array[i] / 32768.0;
      }
 
-     const source = actx.createBufferSource();
+     const source = pactx.createBufferSource();
      source.buffer = audioBuffer;
-     source.connect(actx.destination);
+     source.connect(pactx.destination);
      
-     if (nextPlayTimeRef.current < actx.currentTime) {
-         nextPlayTimeRef.current = actx.currentTime;
+     if (nextPlayTimeRef.current < pactx.currentTime) {
+         // Add 100ms jitter buffer for seamless playback
+         nextPlayTimeRef.current = pactx.currentTime + 0.1;
      }
      source.start(nextPlayTimeRef.current);
      nextPlayTimeRef.current += audioBuffer.duration;

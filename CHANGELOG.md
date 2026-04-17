@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.5] - 2026-04-17
+
+### 🐛 Bug Fixes
+- **Audio Quality**: Monologue モードにおける音声の音質（ブチブチと途切れたりノイズが乗る現象）を大幅に改善しました。
+  - 再生専用の `AudioContext` を録音用と分離し、ブラウザ本来の高音質レートで再生されるようにしました。
+  - ネットワークの遅延を吸収し滑らかに再生が繋がるように 100ms のジッターバッファ（遅延余裕）を再生キューに導入しました。
+
 ## [1.5.4] - 2026-04-17
 
 ### 💄 UI/UX Improvements
