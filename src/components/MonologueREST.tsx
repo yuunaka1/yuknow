@@ -2,14 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Globe, RefreshCcw, Loader, Trash2 } from 'lucide-react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
-function base64ToArrayBuffer(base64: string) {
-  const binaryString = atob(base64);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes.buffer;
-}
+// removed base64 function
 
 interface LogEntry {
   id: string;
@@ -23,7 +16,6 @@ export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.
   const [logs, setLogs] = useLocalStorage<LogEntry[]>('uknow_monologue2_logs', []);
   
   const recognitionRef = useRef<any>(null);
-  const playbackAudioContextRef = useRef<AudioContext | null>(null);
   const logEndRef = useRef<HTMLDivElement | null>(null);
   const isActiveSessionRef = useRef(false);
   const isProcessingRef = useRef(false);
@@ -94,9 +86,7 @@ export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.
           // ignore
         }
       }
-      if (playbackAudioContextRef.current) {
-        playbackAudioContextRef.current.close().catch(console.error);
-      }
+      // removed playbackAudioContext ref cleanup
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -166,44 +156,9 @@ export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.
       // Display translation immediately
       addLog(englishText.trim(), "bot");
 
-      // Step 2: Convert to TTS
-      const ttsPayload = {
-        contents: [
-          { role: "user", parts: [{ text: englishText.trim() }] }
-        ],
-        generationConfig: {
-          responseModalities: ["AUDIO"],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: {
-                voiceName: "Kore"
-              }
-            }
-          }
-        }
-      };
+      // Step 2: Convert to TTS using Browser API
+      await playBrowserTTS(englishText.trim());
 
-      const ttsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(ttsPayload)
-      });
-
-      if (!ttsResponse.ok) {
-        const errData = await ttsResponse.text();
-        throw new Error(`TTS API Error: ${ttsResponse.status} - ${errData}`);
-      }
-
-      const ttsData = await ttsResponse.json();
-      if (ttsData.candidates && ttsData.candidates[0].content.parts) {
-        for (const part of ttsData.candidates[0].content.parts) {
-          if (part.inlineData) {
-            await playAudio(part.inlineData.data, part.inlineData.mimeType);
-          }
-        }
-      } else {
-        addLog("No valid audio received from TTS Gemini.", "system");
-      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       console.error(err);
@@ -218,32 +173,33 @@ export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.
     }
   };
 
-  const playAudio = async (base64Data: string, mimeType: string) => {
-    if (!playbackAudioContextRef.current) {
-      playbackAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    const pactx = playbackAudioContextRef.current;
-    
-    const matchRate = mimeType.match(/rate=(\d+)/);
-    const outRate = matchRate ? parseInt(matchRate[1]) : 24000;
+  const playBrowserTTS = (text: string): Promise<void> => {
+    return new Promise((resolve) => {
+      if (!window.speechSynthesis) {
+        addLog("Browser TTS is not supported.", "system");
+        resolve();
+        return;
+      }
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      
+      // Try to find a high quality native voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(v => v.name.includes("Google") && v.lang.startsWith("en")) 
+                          || voices.find(v => v.lang === "en-US") 
+                          || null;
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
 
-    const arrayBuffer = base64ToArrayBuffer(base64Data);
-    const int16Array = new Int16Array(arrayBuffer);
-    
-    const audioBuffer = pactx.createBuffer(1, int16Array.length, outRate);
-    const channelData = audioBuffer.getChannelData(0);
-    for (let i = 0; i < int16Array.length; i++) {
-        channelData[i] = int16Array[i] / 32768.0;
-    }
+      utterance.onend = () => resolve();
+      utterance.onerror = (e) => {
+        console.error("TTS Error", e);
+        resolve();
+      };
 
-    const source = pactx.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(pactx.destination);
-    
-    // Play immediately wrapper
-    return new Promise<void>((resolve) => {
-      source.onended = () => resolve();
-      source.start();
+      window.speechSynthesis.speak(utterance);
     });
   };
 
@@ -267,7 +223,7 @@ export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.
         <Globe size={24} /> {title}
       </h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-        REST Fetch-based TTS Translation pipeline. Powered by {modelName}.
+        [Native Browser TTS Mode] Text model: {textModelName}
       </p>
 
       {/* Control Panel */}

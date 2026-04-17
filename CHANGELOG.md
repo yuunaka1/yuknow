@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.18] - 2026-04-17
+
+### ✨ Features
+- **Monologue 2**: **「超低遅延」特化の A モードへ完全移行しました！**
+  GeminiのTTS（音声生成）API通信を完全に廃止し、ブラウザ標準の Native Speech Synthesis (Web Speech API) を使用するようにバックエンド処理を書き換えました。
+  これにより、翻訳テキストが出た瞬間にラグなし（遅延ゼロ）ですぐに読み上げが開始される、超機敏なレスポンスが実現されています。
+
 ## [1.5.17] - 2026-04-17
 
 ### 🐛 Bug Fixes
