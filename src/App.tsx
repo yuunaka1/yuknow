@@ -59,7 +59,7 @@ function App() {
             onClick={() => setView('translation')}
             disabled={!geminiApiKey}
           >
-            <Globe size={18} /> Translation
+            <Globe size={18} /> Monologue
           </button>
           <button 
             className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 

@@ -5,8 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [1.5.0] - 2026-04-17
 
 ### ✨ Features
-- **Live Translation Mode**: 追加！Gemini Multimodal Live API (`gemini-2.5-flash-native-audio-preview`等) を使用した、完全リアルタイムの双方向・音声翻訳（日本語→英語）モードを実装。
+- **Monologue Mode**: 追加！Gemini Multimodal Live API (`gemini-2.5-flash-native-audio-preview`等) を使用した、完全リアルタイムの双方向・音声翻訳（日本語→英語）モードを実装。メニュー名は「Monologue」としています。
 - **Native PCM WebSocket**: APIの仕様に従い、マイク入力を内部で `16kHz PCM` にリアルタイム変換し、WebSocketを通じてGeminiと連続的な音声データの送受信を行う機能を構築。
+- **Clear Voice**: Geminiの出力音声を、よりクリアな女性の声（"Kore" ボイス）に変更しました。
 
 ## [1.4.1] - 2026-04-17
 
