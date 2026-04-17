@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.10] - 2026-04-17
+
+### 🐛 Bug Fixes
+- **Code Quality**: `MonologueREST.tsx` 内で、未使用の変数 `e` が存在し、空のブロック文（Empty block statement）が含まれていたことによる TypeScript / ESLint のビルドエラーを修正しました。
+
 ## [1.5.9] - 2026-04-17
 
 ### ✨ Features

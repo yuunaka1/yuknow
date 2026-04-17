@@ -79,7 +79,11 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
 
     return () => {
       if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch(e){}
+        try { 
+          recognitionRef.current.stop(); 
+        } catch {
+          // ignore
+        }
       }
       if (playbackAudioContextRef.current) {
         playbackAudioContextRef.current.close().catch(console.error);
