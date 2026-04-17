@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-04-17
+
+### 🚀 Major Features
+- **Gemini Live Mode**: BidiGenerateContent (Gemini Multimodal Live API)に対応した新しい双方向リアルタイム対話機能「LIVE」メニューを実装しました。
+  - RESTや旧式のAPIではなく、WebSocketプロトコルを使用した純粋なフルストリーミング通信を採用しています。
+  - マイクロフォン入力は独自の ScriptProcessor (AudioWorklet互換) パイプラインを経由して `16kHz PCM` フォーマットにリアルタイムエンコードされ、常時送信されます。
+  - ボットからの返答音声を `24kHz PCM` でリアルタイムに受信し、`AudioContext` のキューを利用して連続再生（ストリーミング出力）します。
+  - ユーザーが話しかけた瞬間にAPIから送信される `interrupted` 信号を検知し、瞬時にボットの再生を破棄・停止させる「Barge-in（割り込み）」に対応しています。
+  - 指定モデルを `models/gemini-3.1-flash-live-preview` にアップデートし、最新のマルチモーダル機能の恩恵を受けられるように設定しました。
+
 ## [1.5.21] - 2026-04-17
 
 ### ✨ Features

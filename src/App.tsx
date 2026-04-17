@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, BookOpen, BrainCircuit, Headphones, HelpCircle, MessageSquare, Globe } from 'lucide-react';
+import { Settings, BookOpen, BrainCircuit, Headphones, HelpCircle, MessageSquare, Globe, Zap } from 'lucide-react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import SettingsPanel from './components/SettingsPanel';
 import Dashboard from './components/Dashboard';
@@ -7,10 +7,11 @@ import Quiz from './components/Quiz';
 import ShadowingPlayer from './components/ShadowingPlayer';
 import Coaching from './components/Coaching';
 import MonologueREST from './components/MonologueREST';
+import GeminiLive from './components/GeminiLive';
 import readmeText from '../README.md?raw';
 import packageJson from '../package.json';
 
-type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'monologue2' | 'help';
+type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'monologue2' | 'gemini_live' | 'help';
 
 function App() {
   const [view, setView] = useState<View>('settings');
@@ -64,6 +65,13 @@ function App() {
             disabled={!geminiApiKey}
           >
             <Globe size={18} /> Monologue
+          </button>
+          <button 
+            className={`btn ${view === 'gemini_live' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setView('gemini_live')}
+            disabled={!geminiApiKey}
+          >
+            <Zap size={18} /> Live
           </button>
           <button 
             className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
@@ -130,6 +138,10 @@ function App() {
         
         {view === 'monologue2' && geminiApiKey && (
           <MonologueREST geminiApiKey={geminiApiKey} textModelName={geminiModel} title="MONOLOGUE" />
+        )}
+        
+        {view === 'gemini_live' && geminiApiKey && (
+          <GeminiLive geminiApiKey={geminiApiKey} />
         )}
         
         {view === 'help' && (
