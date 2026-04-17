@@ -125,7 +125,7 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
           { role: "user", parts: [{ text: prompt }] }
         ],
         generationConfig: {
-          responseModalities: ["AUDIO"],
+          responseModalities: ["TEXT", "AUDIO"],
           speechConfig: {
             voiceConfig: {
               prebuiltVoiceConfig: {

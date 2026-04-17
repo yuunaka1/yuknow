@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.12] - 2026-04-17
+
+### ✨ Features
+- **Monologue 2**: Gemini APIへのリクエストパラメータ（`responseModalities`）に `"TEXT"` と `"AUDIO"` の両方を含めるよう修正しました。これにより、音声応答に加えて翻訳後の英語テキストも正しく生成され、コンソールのUI上にログとして表示されるようになります。
+
 ## [1.5.11] - 2026-04-17
 
 ### 🐛 Bug Fixes
