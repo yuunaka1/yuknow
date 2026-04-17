@@ -9,6 +9,7 @@ interface LogMessage {
   id: string;
   sender: 'user' | 'model' | 'system';
   text: string;
+  isStream?: boolean;
 }
 
 // --- Audio Output Player (24kHz PCM) ---
@@ -136,10 +137,28 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
 
   const modelOverride = "models/gemini-3.1-flash-live-preview";
 
-  const addLog = useCallback((text: string, sender: 'user' | 'model' | 'system') => {
+  const addLog = useCallback((text: string, sender: 'user' | 'model' | 'system', isStream: boolean = false) => {
     setLogs(prev => {
-      const arr = [...prev, { id: Math.random().toString(), text, sender }];
+      const last = prev[prev.length - 1];
+      if (last && last.sender === sender && last.isStream) {
+        const newLogs = [...prev];
+        newLogs[newLogs.length - 1] = { ...last, text: last.text + text, isStream };
+        return newLogs;
+      }
+      const arr = [...prev, { id: Math.random().toString(), text, sender, isStream }];
       return arr.slice(-150);
+    });
+  }, [setLogs]);
+
+  const finalizeStream = useCallback((sender: 'user' | 'model') => {
+    setLogs(prev => {
+      const last = prev[prev.length - 1];
+      if (last && last.sender === sender && last.isStream) {
+        const newLogs = [...prev];
+        newLogs[newLogs.length - 1] = { ...last, isStream: false };
+        return newLogs;
+      }
+      return prev;
     });
   }, [setLogs]);
 
@@ -249,16 +268,18 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
              if (content.interrupted) {
                 addLog("Interrupted by user.", "system");
                 playerRef.current?.stop();
+                finalizeStream('model');
+                finalizeStream('user');
                 setAppState('listening');
              }
 
              // Model turn payload
              if (content.modelTurn) {
+                finalizeStream('user'); // User's turn naturally ends when model starts answering
                 if (content.modelTurn.parts) {
-                   let textBuf = "";
                    for (const part of content.modelTurn.parts) {
                      if (part.text) {
-                        textBuf += part.text;
+                        addLog(part.text, "model", true);
                      }
                      if (part.inlineData && part.inlineData.mimeType.startsWith("audio/pcm")) {
                         // Play audio
@@ -266,26 +287,24 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
                         await playerRef.current?.playPcmData(part.inlineData.data);
                      }
                    }
-                   if (textBuf.trim()) {
-                     addLog(textBuf, "model");
-                   }
                 }
              }
 
              // Transcriptions
              if (content.inputTranscription && content.inputTranscription.text) {
-                // User's voice transcription
-                addLog(content.inputTranscription.text, "user");
+                // User's voice transcription chunks
+                addLog(content.inputTranscription.text, "user", true);
              }
              
              if (content.outputTranscription && content.outputTranscription.text) {
-                // Model's voice transcription (if output is exclusively audio)
-                addLog(content.outputTranscription.text, "model");
+                // Model's voice transcription chunks
+                addLog(content.outputTranscription.text, "model", true);
              }
              
              // Turn complete
              if (content.turnComplete) {
                 setAppState('listening');
+                finalizeStream('model');
              }
           }
 
