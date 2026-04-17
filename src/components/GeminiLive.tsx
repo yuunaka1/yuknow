@@ -321,13 +321,13 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
 
 
   const btnBaseStyles = {
-    padding: '0.75rem 1.5rem',
-    borderRadius: '8px',
+    padding: '0.5rem 1rem',
+    borderRadius: '6px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem',
-    fontSize: '1rem',
+    gap: '0.4rem',
+    fontSize: '0.85rem',
     fontWeight: 'bold',
     textTransform: 'uppercase' as const,
     border: '1px solid currentColor',
@@ -346,53 +346,50 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
   const currentColor = statusColors[appState];
 
   return (
-    <div className="animate-fade-in glass-panel" style={{ padding: 'clamp(1rem, 4vw, 2rem)' }}>
-      <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#00ff41' }}>
-        <Zap size={24} /> GEMINI LIVE MODE
-      </h2>
-      
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '0.9rem' }}>
-        Ultra-low latency bidirectional voice assistant via Multimodal Live API ({modelOverride}).
-      </p>
+    <div className="animate-fade-in glass-panel" style={{ padding: 'clamp(1rem, 2vw, 1.5rem)', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 140px)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#00ff41', margin: 0, fontSize: '1.25rem' }}>
+          <Zap size={20} /> GEMINI LIVE MODE
+        </h2>
 
-      {/* Control Panel */}
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem', padding: '1.5rem', backgroundColor: 'rgba(0,0,0,0.3)', border: `1px dashed ${currentColor}`, borderRadius: '4px' }}>
-        
-        {appState === 'idle' || appState === 'error' ? (
-          <button 
-            onClick={startSession}
-            style={{ ...btnBaseStyles, color: '#00ff41', backgroundColor: 'rgba(0, 255, 65, 0.1)' }}
-          >
-            <Mic size={20} /> START LIVE SESSION
-          </button>
-        ) : (
-          <button 
-            onClick={stopSession}
-            style={{ ...btnBaseStyles, color: '#ff3333', backgroundColor: 'rgba(255, 51, 51, 0.1)' }}
-          >
-            <LogOut size={20} /> END SESSION
-          </button>
-        )}
+        {/* Control Panel Inline */}
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          {appState === 'idle' || appState === 'error' ? (
+            <button 
+              onClick={startSession}
+              style={{ ...btnBaseStyles, color: '#00ff41', backgroundColor: 'rgba(0, 255, 65, 0.1)' }}
+            >
+              <Mic size={16} /> START
+            </button>
+          ) : (
+            <button 
+              onClick={stopSession}
+              style={{ ...btnBaseStyles, color: '#ff3333', backgroundColor: 'rgba(255, 51, 51, 0.1)' }}
+            >
+              <LogOut size={16} /> END
+            </button>
+          )}
 
-        {/* State Indicator */}
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '0.5rem', 
-          marginLeft: 'auto', 
-          fontWeight: 'bold', 
-          color: currentColor,
-          backgroundColor: 'rgba(0,0,0,0.4)',
-          padding: '0.5rem 1rem',
-          borderRadius: '4px',
-          border: `1px solid ${currentColor}22`
-        }}>
-          {(appState === 'connecting' || appState === 'processing') && <Loader size={16} className="animate-spin" />}
-          {appState === 'error' && <AlertTriangle size={16} />}
-          {appState === 'listening' && <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: currentColor, boxShadow: `0 0 8px ${currentColor}`, animation: 'pulse 1.5s infinite' }}></div>}
-          {appState === 'speaking' && <Globe size={16} className="animate-pulse" />}
-          
-          <span style={{ letterSpacing: '2px' }}>{appState.toUpperCase()}</span>
+          {/* State Indicator */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.4rem', 
+            fontWeight: 'bold', 
+            color: currentColor,
+            backgroundColor: 'rgba(0,0,0,0.4)',
+            padding: '0.4rem 0.75rem',
+            borderRadius: '4px',
+            border: `1px solid ${currentColor}22`,
+            fontSize: '0.85rem'
+          }}>
+            {(appState === 'connecting' || appState === 'processing') && <Loader size={14} className="animate-spin" />}
+            {appState === 'error' && <AlertTriangle size={14} />}
+            {appState === 'listening' && <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: currentColor, boxShadow: `0 0 8px ${currentColor}`, animation: 'pulse 1.5s infinite' }}></div>}
+            {appState === 'speaking' && <Globe size={14} className="animate-pulse" />}
+            
+            <span style={{ letterSpacing: '1px' }}>{appState.toUpperCase()}</span>
+          </div>
         </div>
       </div>
 
@@ -406,12 +403,11 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
 
       {/* Terminal Log */}
       <div style={{
-        marginTop: '1.5rem',
-        padding: '1.5rem',
+        flex: 1,
+        padding: '1rem',
         backgroundColor: '#0a0a00',
         border: '1px solid #005000',
         borderRadius: '4px',
-        height: '400px',
         overflowY: 'auto',
         fontFamily: "'Fira Code', monospace"
       }}>
