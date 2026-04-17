@@ -145,6 +145,15 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
       // Do NOT force sampleRate here. Let the browser use the Bluetooth hardware's native rate to avoid massive OS resampler lag.
       const actx = new (window.AudioContext || (window as any).webkitAudioContext)();
       audioContextRef.current = actx;
+      
+      // WebAudio Keep-Alive Hack for Background/Lock-screen execution
+      const keepAliveOsc = actx.createOscillator();
+      const keepAliveGain = actx.createGain();
+      keepAliveGain.gain.value = 0; // Silent
+      keepAliveOsc.connect(keepAliveGain);
+      keepAliveGain.connect(actx.destination);
+      keepAliveOsc.start();
+      
       const source = actx.createMediaStreamSource(stream);
 
       // Using ScriptProcessorNode as a simple raw PCM encoder
@@ -225,6 +234,14 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
   const playAudioChunk = async (base64Data: string, mimeType: string) => {
      if (!playbackAudioContextRef.current) {
        playbackAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+       
+       // WebAudio Keep-Alive Hack for Playback context
+       const keepAliveOsc = playbackAudioContextRef.current.createOscillator();
+       const keepAliveGain = playbackAudioContextRef.current.createGain();
+       keepAliveGain.gain.value = 0;
+       keepAliveOsc.connect(keepAliveGain);
+       keepAliveGain.connect(playbackAudioContextRef.current.destination);
+       keepAliveOsc.start();
      }
      const pactx = playbackAudioContextRef.current;
      
@@ -343,16 +360,17 @@ export default function LiveTranslation({ geminiApiKey, modelName }: { geminiApi
             <div 
               key={log.id} 
               style={{
-                marginBottom: '1rem',
-                color: log.type === 'bot' ? '#00ff41' : log.type === 'user' ? '#fff' : '#005000',
-                borderLeft: `2px solid ${log.type === 'bot' ? '#00ff41' : log.type === 'system' ? '#005000' : '#fff'}`,
-                paddingLeft: '1rem'
+                marginBottom: log.type === 'bot' ? '1.5rem' : '0.5rem',
+                color: log.type === 'bot' ? '#00ff41' : log.type === 'user' ? '#888' : '#005000',
+                fontSize: log.type === 'bot' ? '1.2rem' : '0.9rem',
+                fontStyle: log.type === 'system' ? 'italic' : 'normal',
+                opacity: log.type === 'user' ? 0.8 : 1,
               }}
             >
-              <div style={{ fontSize: '0.75rem', opacity: 0.7, marginBottom: '0.2rem' }}>
-                [{log.type.toUpperCase()}]
-              </div>
-              <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{log.text}</div>
+              <span style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+                {log.type === 'user' && <span style={{ marginRight: '0.5rem' }}>&gt;</span>}
+                {log.text}
+              </span>
             </div>
           ))
         )}

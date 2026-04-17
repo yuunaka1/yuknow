@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.7] - 2026-04-17
+
+### ✨ Features
+- **Background Keep-Alive**: スマホの画面がロックされた状態でも、WebAudio APIのサイレント機能を利用してバックグラウンドでマイク録音・WebSocket通信を持続させる仕組みを導入しました。
+
+### 💄 UI/UX Improvements
+- **Terminal Log**: Monologue モードでの翻訳生成テキストのレイアウトを見直し、四角い見出しスタイルなどを廃止しました。システムの通知は控えめに、Geminiの翻訳テキストは大きくクリーンに表示するように改善しました。
+
 ## [1.5.6] - 2026-04-17
 
 ### 🐛 Bug Fixes
