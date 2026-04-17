@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.3] - 2026-04-17
+
+### 💄 UI/UX Improvements
+- **Header**: アプリ左上のロゴの横に、現在のバージョン番号（`package.json` 準拠）を表示するようにしました。
+
 ## [1.5.2] - 2026-04-17
 
 ### 🐛 Bug Fixes

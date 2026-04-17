@@ -8,6 +8,7 @@ import ShadowingPlayer from './components/ShadowingPlayer';
 import Coaching from './components/Coaching';
 import LiveTranslation from './components/LiveTranslation';
 import readmeText from '../README.md?raw';
+import packageJson from '../package.json';
 
 type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'translation' | 'help';
 
@@ -35,9 +36,12 @@ function App() {
   return (
     <div className="container animate-fade-in">
       <header style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: 'clamp(1rem, 4vw, 2rem)' }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.5rem' }}>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.5rem', margin: 0 }}>
           <BrainCircuit color="var(--brand-primary)" />
           <span className="text-gradient">// yuKnow</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', fontWeight: 'normal', fontFamily: 'monospace', marginLeft: '0.5rem' }}>
+            v{packageJson.version}
+          </span>
         </h1>
         <nav style={{ display: 'flex', gap: 'clamp(0.25rem, 2vw, 0.5rem)', flexWrap: 'wrap' }}>
           <button 
