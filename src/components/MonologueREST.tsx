@@ -78,9 +78,10 @@ export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.
 
     recognition.onerror = (event: any) => {
       console.error("Speech Recognition Error:", event.error);
-      if (event.error === 'not-allowed') {
-        addSystemLog("Microphone access denied.");
+      if (event.error === 'not-allowed' || event.error === 'audio-capture') {
+        addSystemLog(`Microphone access error (${event.error}). Please check permissions and try again.`);
         setIsRecording(false);
+        isActiveSessionRef.current = false; // Stop the auto-restart loop
       }
     };
 
