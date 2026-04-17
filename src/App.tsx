@@ -6,12 +6,11 @@ import Dashboard from './components/Dashboard';
 import Quiz from './components/Quiz';
 import ShadowingPlayer from './components/ShadowingPlayer';
 import Coaching from './components/Coaching';
-import LiveTranslation from './components/LiveTranslation';
 import MonologueREST from './components/MonologueREST';
 import readmeText from '../README.md?raw';
 import packageJson from '../package.json';
 
-type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'translation' | 'monologue2' | 'help';
+type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'monologue2' | 'help';
 
 function App() {
   const [view, setView] = useState<View>('settings');
@@ -60,18 +59,11 @@ function App() {
             <MessageSquare size={18} /> Coaching
           </button>
           <button 
-            className={`btn ${view === 'translation' ? 'btn-primary' : 'btn-secondary'}`} 
-            onClick={() => setView('translation')}
-            disabled={!geminiApiKey}
-          >
-            <Globe size={18} /> Monologue
-          </button>
-          <button 
             className={`btn ${view === 'monologue2' ? 'btn-primary' : 'btn-secondary'}`} 
             onClick={() => setView('monologue2')}
             disabled={!geminiApiKey}
           >
-            <Globe size={18} /> Monologue 2
+            <Globe size={18} /> Monologue
           </button>
           <button 
             className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
@@ -136,12 +128,8 @@ function App() {
           <Coaching geminiApiKey={geminiApiKey} geminiModel={geminiModel} />
         )}
         
-        {view === 'translation' && geminiApiKey && (
-          <LiveTranslation geminiApiKey={geminiApiKey} modelName={translationModel} title="MONOLOGUE" />
-        )}
-        
         {view === 'monologue2' && geminiApiKey && (
-          <MonologueREST geminiApiKey={geminiApiKey} textModelName={geminiModel} title="MONOLOGUE 2 (3.1 TTS)" />
+          <MonologueREST geminiApiKey={geminiApiKey} textModelName={geminiModel} title="MONOLOGUE" />
         )}
         
         {view === 'help' && (

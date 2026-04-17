@@ -222,9 +222,6 @@ export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.
       <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#00ff41' }}>
         <Globe size={24} /> {title}
       </h2>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-        [Native Browser TTS Mode] Text model: {textModelName}
-      </p>
 
       {/* Control Panel */}
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem', padding: '1.5rem', backgroundColor: 'rgba(0,0,0,0.3)', border: '1px dashed #005000', borderRadius: '4px' }}>
@@ -290,11 +287,10 @@ export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.
             <div 
               key={log.id} 
               style={{
-                marginBottom: log.type === 'bot' ? '1.5rem' : '0.5rem',
+                marginBottom: '0.5rem',
                 color: log.type === 'bot' ? '#00ff41' : log.type === 'user' ? '#888' : '#005000',
-                fontSize: log.type === 'bot' ? '1.2rem' : '0.9rem',
+                fontSize: '0.9rem',
                 fontStyle: log.type === 'system' ? 'italic' : 'normal',
-                opacity: log.type === 'user' ? 0.8 : 1,
               }}
             >
               <span style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>

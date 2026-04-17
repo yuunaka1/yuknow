@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.20] - 2026-04-17
+
+### ✨ Features & UI/UX Improvements
+- **Monologue**:
+  - 旧WebSocket通信ベースの `LiveTranslation` 機能・ファイルを完全に削除し、メニューの「MONOLOGUE」ボタンから直接超低遅延のREST&NativeTTS版が開くようにアプリ全体のUIとルーティングを一本化しました。
+  - ログ画面の表示領域を少しでも広く確保するため、画面上部の余分なサブタイトル（テキストモデルの説明文）を削除しました。
+  - ボットからの英語テキスト出力が不必要に大きく表示されていたスタイル設定を解除し、日本語の入力ログと「文字サイズ・行間」を完全に統一しました。色（緑とグレー）の違いのみで見分けがつく、よりクリーンなログ形式になりました。
+
 ## [1.5.19] - 2026-04-17
 
 ### 🐛 Bug Fixes
