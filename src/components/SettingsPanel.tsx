@@ -23,22 +23,6 @@ export default function SettingsPanel({
         Configure your private APIs to enable uKnow. Your keys are stored locally in your browser.
       </p>
       
-      <div className="form-group">
-        <label className="form-label" htmlFor="googleClientId">
-          Google Client ID (OAuth 2.0)
-        </label>
-        <input 
-          id="googleClientId"
-          className="form-input" 
-          type="text" 
-          placeholder="e.g. 123456789-abc.apps.googleusercontent.com"
-          value={googleClientId}
-          onChange={(e) => setGoogleClientId(e.target.value)}
-        />
-        <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
-          Required to read your private Google Docs securely.
-        </p>
-      </div>
 
       <div className="form-group">
         <label className="form-label" htmlFor="geminiApiKey">
@@ -93,6 +77,23 @@ export default function SettingsPanel({
         />
         <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
           The ID component from your Google Docs URL: https://docs.google.com/document/d/&lt;b&gt;[DOC_ID]&lt;/b&gt;/edit
+        </p>
+      </div>
+
+      <div className="form-group">
+        <label className="form-label" htmlFor="googleClientId">
+          Google Client ID (OAuth 2.0)
+        </label>
+        <input 
+          id="googleClientId"
+          className="form-input" 
+          type="text" 
+          placeholder="e.g. 123456789-abc.apps.googleusercontent.com"
+          value={googleClientId}
+          onChange={(e) => setGoogleClientId(e.target.value)}
+        />
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
+          Required to read your private Google Docs securely.
         </p>
       </div>
       

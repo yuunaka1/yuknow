@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2026-04-17
+
+### 💄 UI/UX Improvements
+- **Navigation**: ヘッダーのメニューの並び順を `Shadowing` → `Coaching` → `Flashcards` の順に変更しました。
+- **Settings**: Settings画面内の表示順を見直し、`Google Client ID` の設定項目を一番下に移動しました。
+
 ## [1.4.0] - 2026-04-17
 
 ### ✨ Features

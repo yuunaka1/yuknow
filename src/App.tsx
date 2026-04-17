@@ -39,13 +39,6 @@ function App() {
         </h1>
         <nav style={{ display: 'flex', gap: 'clamp(0.25rem, 2vw, 0.5rem)', flexWrap: 'wrap' }}>
           <button 
-            className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
-            onClick={() => setView('dashboard')}
-            disabled={!isFlashcardConfigured}
-          >
-            <BookOpen size={18} /> Flashcards
-          </button>
-          <button 
             className={`btn ${view === 'shadowing' ? 'btn-primary' : 'btn-secondary'}`} 
             onClick={() => setView('shadowing')}
             disabled={!isShadowingConfigured}
@@ -58,6 +51,13 @@ function App() {
             disabled={!isShadowingConfigured}
           >
             <MessageSquare size={18} /> Coaching
+          </button>
+          <button 
+            className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setView('dashboard')}
+            disabled={!isFlashcardConfigured}
+          >
+            <BookOpen size={18} /> Flashcards
           </button>
           <button 
             className={`btn ${view === 'settings' ? 'btn-primary' : 'btn-secondary'}`} 
