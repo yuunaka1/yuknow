@@ -16,7 +16,7 @@ interface LogEntry {
   type: 'user' | 'bot' | 'system';
 }
 
-export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLOGUE 2 (REST)" }: { geminiApiKey: string, modelName: string, title?: string }) {
+export default function MonologueREST({ geminiApiKey, textModelName = "gemini-3.1-flash-lite-preview", modelName, title = "MONOLOGUE 2 (REST)" }: { geminiApiKey: string, textModelName?: string, modelName: string, title?: string }) {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -119,14 +119,51 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
     setIsProcessing(true);
     isProcessingRef.current = true;
     try {
-      const prompt = `You are a professional voice translator. Translate the following Japanese text into natural, flowing English. Speak slowly and clearly. You MUST output the English translation as text alongside the audio. \n\nInput: ${japaneseText}`;
+      // Step 1: Translate text
+      const translatePrompt = `You are a professional voice translator. Translate the following Japanese text into natural, flowing English. Output ONLY the English translation, without any quotes or conversational filler. \n\nInput: ${japaneseText}`;
       
-      const payload = {
+      const translatePayload = {
         contents: [
-          { role: "user", parts: [{ text: prompt }] }
+          { role: "user", parts: [{ text: translatePrompt }] }
+        ]
+      };
+
+      const translateResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${textModelName}:generateContent?key=${geminiApiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(translatePayload)
+      });
+
+      if (!translateResponse.ok) {
+        const errData = await translateResponse.text();
+        throw new Error(`Translation API Error: ${translateResponse.status} - ${errData}`);
+      }
+
+      const translateData = await translateResponse.json();
+      let englishText = "";
+      if (translateData.candidates && translateData.candidates[0].content.parts) {
+        for (const part of translateData.candidates[0].content.parts) {
+          if (part.text) {
+            englishText += part.text;
+          }
+        }
+      }
+
+      if (!englishText.trim()) {
+        throw new Error("Failed to translate the text.");
+      }
+
+      // Display translation immediately
+      addLog(englishText.trim(), "bot");
+
+      // Step 2: Convert to TTS
+      const ttsPrompt = `Speak the following English text slowly and clearly: ${englishText.trim()}`;
+      const ttsPayload = {
+        contents: [
+          { role: "user", parts: [{ text: ttsPrompt }] }
         ],
         generationConfig: {
-          responseModalities: ["TEXT", "AUDIO"],
+          responseModalities: ["AUDIO"],
           speechConfig: {
             voiceConfig: {
               prebuiltVoiceConfig: {
@@ -137,40 +174,26 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
         }
       };
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`, {
+      const ttsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(ttsPayload)
       });
 
-      if (!response.ok) {
-        const errData = await response.text();
-        throw new Error(`API Error: ${response.status} - ${errData}`);
+      if (!ttsResponse.ok) {
+        const errData = await ttsResponse.text();
+        throw new Error(`TTS API Error: ${ttsResponse.status} - ${errData}`);
       }
 
-      const data = await response.json();
-      
-      let receivedText = "";
-      if (data.candidates && data.candidates[0].content.parts) {
-        for (const part of data.candidates[0].content.parts) {
-          if (part.text) {
-            receivedText += part.text;
-          }
-        }
-        
-        if (receivedText.trim()) {
-          addLog(receivedText.trim(), "bot");
-        } else {
-          addLog("[ 音声のみ返却されました (テキストデータ無し) ]", "system");
-        }
-
-        for (const part of data.candidates[0].content.parts) {
+      const ttsData = await ttsResponse.json();
+      if (ttsData.candidates && ttsData.candidates[0].content.parts) {
+        for (const part of ttsData.candidates[0].content.parts) {
           if (part.inlineData) {
             await playAudio(part.inlineData.data, part.inlineData.mimeType);
           }
         }
       } else {
-        addLog("No valid output received from Gemini.", "system");
+        addLog("No valid audio received from TTS Gemini.", "system");
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);

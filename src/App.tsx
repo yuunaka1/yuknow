@@ -141,7 +141,7 @@ function App() {
         )}
         
         {view === 'monologue2' && geminiApiKey && (
-          <MonologueREST geminiApiKey={geminiApiKey} modelName="gemini-3.1-flash-tts-preview" title="MONOLOGUE 2 (3.1 TTS)" />
+          <MonologueREST geminiApiKey={geminiApiKey} textModelName={geminiModel} modelName="gemini-3.1-flash-tts-preview" title="MONOLOGUE 2 (3.1 TTS)" />
         )}
         
         {view === 'help' && (

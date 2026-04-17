@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.15] - 2026-04-17
+
+### ✨ Features
+- **Monologue 2**: `gemini-3.1-flash-tts-preview` モデルがテキストを出力できない仕様に対応するため、ご提案いただいた「構成変更」を実装しました。
+  1. STT で日本語を取得。
+  2. 高速なテキストモデル（`gemini-3.1-flash-lite-preview` など）で英語に翻訳し、即座に画面へテキスト出力。
+  3. その翻訳された英語テキストを `gemini-3.1-flash-tts-preview` へ改めて渡し、音声出力（TTS）させる、という「2段階RESTリクエスト構成」へと処理フローを作り直しました。
+  これにより、翻訳テキストが確実に欠損なく表示されるようになります！
+
 ## [1.5.14] - 2026-04-17
 
 ### 🐛 Bug Fixes
