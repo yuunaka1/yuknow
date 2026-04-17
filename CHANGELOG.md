@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.11] - 2026-04-17
+
+### 🐛 Bug Fixes
+- **Monologue 2**: Gemini APIからの音声応答が終了した後、自動的に次の「聞き取り（STT）」に移行せず、1回の発話で止まってしまっていたトランシーバーモードの仕様不具合を改修しました。現在は、応答が終わり次第シームレスに次の入力受付へとループします。
+
 ## [1.5.10] - 2026-04-17
 
 ### 🐛 Bug Fixes

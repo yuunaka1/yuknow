@@ -24,6 +24,8 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
   const recognitionRef = useRef<any>(null);
   const playbackAudioContextRef = useRef<AudioContext | null>(null);
   const logEndRef = useRef<HTMLDivElement | null>(null);
+  const isActiveSessionRef = useRef(false);
+  const isProcessingRef = useRef(false);
 
   const addLog = (text: string, type: 'user' | 'bot' | 'system') => {
     setLogs(prev => [...prev, { id: Math.random().toString(), text, type }]);
@@ -64,14 +66,11 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
     };
 
     recognition.onend = () => {
-      // Auto-restart listening if currently in "recording" mode, but wait until processing finishes
-      // Actually, standard walkie-talkie mode: wait for gemini response, then restart listening.
-      // Easiest is to let `sendToGemini` heavily control the flow or restart immediately?
-      // If we restart immediately, it might pick up Gemini's speakers playing back!
-      // So we do NOT restart until playback finishes. We will handle restarting gracefully.
-      if (isRecording) {
-        setIsRecording(false); // Drop to idle. We can make it push-to-talk or auto-restart later.
-        addLog("Listening paused. Processing...", "system");
+      // Auto-restart if we are in an active session and NOT currently processing Gemini audio
+      if (isActiveSessionRef.current && !isProcessingRef.current) {
+        try { recognition.start(); } catch {}
+      } else if (!isActiveSessionRef.current) {
+        setIsRecording(false);
       }
     };
 
@@ -94,6 +93,7 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
   const startListening = () => {
     if (!recognitionRef.current) return;
     try {
+      isActiveSessionRef.current = true;
       recognitionRef.current.start();
       setIsRecording(true);
       addLog("MIC IS ON (Speak Japanese)...", "system");
@@ -105,6 +105,7 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
   const stopListening = () => {
     if (!recognitionRef.current) return;
     try {
+      isActiveSessionRef.current = false;
       recognitionRef.current.stop();
       setIsRecording(false);
       addLog("MIC TURNED OFF", "system");
@@ -115,6 +116,7 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
 
   const sendToGemini = async (japaneseText: string) => {
     setIsProcessing(true);
+    isProcessingRef.current = true;
     try {
       const prompt = `You are a professional voice translator. Translate the following Japanese text into natural, flowing English. Speak slowly and clearly. Output ONLY the English translation. \n\nInput: ${japaneseText}`;
       
@@ -164,6 +166,11 @@ export default function MonologueREST({ geminiApiKey, modelName, title = "MONOLO
       addLog(`Error: ${err.message}`, "system");
     } finally {
       setIsProcessing(false);
+      isProcessingRef.current = false;
+      // Restart listening automatically if session is still active
+      if (isActiveSessionRef.current) {
+        try { recognitionRef.current?.start(); } catch {}
+      }
     }
   };
 
