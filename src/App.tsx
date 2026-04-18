@@ -14,7 +14,28 @@ import packageJson from '../package.json';
 type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'gemini_live' | 'composition' | 'help';
 
 function App() {
-  const [view, setView] = useState<View>('settings');
+  const getViewFromHash = (): View => {
+    const hash = window.location.hash.replace('#', '') as View;
+    const validViews: View[] = ['dashboard', 'settings', 'quiz', 'shadowing', 'coaching', 'gemini_live', 'composition', 'help'];
+    if (hash === 'monologue' as any) return 'gemini_live'; // alias for backward comp / aesthetic
+    if (hash === 'reflex' as any) return 'composition'; // alias
+    return validViews.includes(hash) ? hash : 'settings';
+  };
+
+  const [view, setView] = useState<View>(getViewFromHash());
+
+  React.useEffect(() => {
+    const handleHashChange = () => setView(getViewFromHash());
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  React.useEffect(() => {
+    const targetHash = view === 'gemini_live' ? 'monologue' : view === 'composition' ? 'reflex' : view;
+    if (window.location.hash !== `#${targetHash}`) {
+      window.history.replaceState(null, '', `#${targetHash}`);
+    }
+  }, [view]);
   
   const [googleClientId, setGoogleClientId] = useLocalStorage('uknow_google_client_id', '');
   const [geminiApiKey, setGeminiApiKey] = useLocalStorage('uknow_gemini_api_key', '');
@@ -24,13 +45,15 @@ function App() {
   const isFlashcardConfigured = googleClientId && geminiApiKey && docId;
   const isShadowingConfigured = !!geminiApiKey;
   
-  // 初期ステートで設定が完了していればダッシュボードを開く
   React.useEffect(() => {
-    if (isFlashcardConfigured && view === 'settings') {
-      setView('dashboard');
-    } else if (isShadowingConfigured && !isFlashcardConfigured && view === 'settings') {
-      setView('shadowing');
+    if (!window.location.hash || window.location.hash === '#settings') {
+      if (isFlashcardConfigured && view === 'settings') {
+        setView('dashboard');
+      } else if (isShadowingConfigured && !isFlashcardConfigured && view === 'settings') {
+        setView('shadowing');
+      }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

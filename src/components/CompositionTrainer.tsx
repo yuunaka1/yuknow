@@ -152,35 +152,16 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
             setAppState('listening');
             addLog(`Training session started at level ${trainingLevel}. Listening...`, "system");
             
-            // Trigger the AI to speak the first sentence automatically
-            if (wsRef.current?.readyState === WebSocket.OPEN) {
-              const triggerMsg = {
-                clientContent: {
-                  turns: [{
-                    role: "user",
-                    parts: [{ text: "Start the training now." }]
-                  }],
-                  turnComplete: true
-                }
-              };
-              wsRef.current.send(JSON.stringify(triggerMsg));
-            }
-
-            // Delay microphone streaming slightly to avoid a known race condition 1008 
-            // where realtimeInput streaming collides with the initial clientContent parsing.
-            setTimeout(async () => {
-              if (wsRef.current?.readyState !== WebSocket.OPEN) return;
-              await recorderRef.current?.start((base64pcm) => {
-                 if (wsRef.current?.readyState === WebSocket.OPEN) {
-                   const audioMessage = {
-                     realtimeInput: {
-                       audio: { mimeType: "audio/pcm;rate=16000", data: base64pcm }
-                     }
-                   };
-                   wsRef.current.send(JSON.stringify(audioMessage));
-                 }
-              });
-            }, 800);
+            await recorderRef.current?.start((base64pcm) => {
+               if (wsRef.current?.readyState === WebSocket.OPEN) {
+                 const audioMessage = {
+                   realtimeInput: {
+                     audio: { mimeType: "audio/pcm;rate=16000", data: base64pcm }
+                   }
+                 };
+                 wsRef.current.send(JSON.stringify(audioMessage));
+               }
+            });
           }
 
           if (payload.serverContent) {
