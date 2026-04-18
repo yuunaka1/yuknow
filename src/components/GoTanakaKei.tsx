@@ -75,7 +75,7 @@ export default function GoTanakaKei({ geminiApiKey, geminiModel }: GoTanakaKeiPr
           } else {
              alert("無効なJSONファイルです。");
           }
-        } catch (err) {
+        } catch {
           alert("ファイルの読み込みに失敗しました。");
         }
       };
