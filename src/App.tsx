@@ -119,14 +119,14 @@ function App() {
             onClick={() => setView('gotanakakei')}
             disabled={!geminiApiKey}
           >
-            <Mic size={18} /> Mock Interview
+            <Mic size={18} /> GoTanakaKei
           </button>
           <button 
             className={`btn ${view === 'freetalk' ? 'btn-primary' : 'btn-secondary'}`} 
             onClick={() => setView('freetalk')}
             disabled={!geminiApiKey}
           >
-            <Coffee size={18} /> Free Talk
+            <Coffee size={18} /> Dialogue
           </button>
           <button 
             className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 

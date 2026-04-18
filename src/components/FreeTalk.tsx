@@ -272,7 +272,7 @@ Act like a natural, supportive English conversation partner. DO NOT just answer 
     <div className="animate-fade-in glass-panel" style={{ padding: 'clamp(1rem, 2vw, 1.5rem)', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 140px)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
         <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffaa00', margin: 0, fontSize: '1.25rem' }}>
-          <Coffee size={20} /> FREE TALK
+          <Coffee size={20} /> DIALOGUE
         </h2>
 
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -369,7 +369,7 @@ Act like a natural, supportive English conversation partner. DO NOT just answer 
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid #503300', backgroundColor: '#1a1000', zIndex: 10 }}>
           <h3 style={{ fontSize: '0.9rem', color: '#aa7700', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            FREE_TALK_STREAM_LOG
+            DIALOGUE_STREAM_LOG
           </h3>
         </div>
         
