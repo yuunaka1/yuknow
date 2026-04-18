@@ -305,7 +305,7 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
     setSessionFeedback('');
     try {
       const logsStr = recentLogs.map(l => `${l.sender === 'user' ? 'Me' : 'Coach'}: ${l.text}`).join('\n');
-      const feedback = await generateReflexFeedback(geminiApiKey, geminiModel, logsStr);
+      const feedback = await generateReflexFeedback(geminiApiKey, geminiModel, logsStr, trainingLevel, grammarTheme);
       setSessionFeedback(feedback);
     } catch (e) {
       console.error(e);

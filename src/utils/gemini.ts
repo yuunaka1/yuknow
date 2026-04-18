@@ -275,18 +275,22 @@ Please output plain text Markdown strictly using the following structure:
   }
 }
 
-export async function generateReflexFeedback(apiKey: string, modelName: string, logs: string): Promise<string> {
+export async function generateReflexFeedback(apiKey: string, modelName: string, logs: string, currentLevel?: string, currentTheme?: string): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: modelName });
   
   const prompt = `以下のトランスクリプトは、ユーザーが日本語の文を英語に翻訳し、スピーキング練習をした記録です。
+現在の設定: レベル=${currentLevel || '不明'}, テーマ=${currentTheme || '総合・ランダム'}
+
 このセッションの「総括フィードバック」を作成してください。
 以下の要素を含めてください：
 - 全体的な強み・良かった点
 - 繰り返して間違えたポイントや文法の癖
 - より自然にするためのフレーズ提案・語彙の改善案
 - 次のステップへの具体的な提案
-簡潔かつ励ましになるような口調で、マークダウン形式で出力してください。
+- **次に Reflex を訓練する際の「推奨レベル（CEFR: A1-C2）」と「推奨の文法テーマ」**（今回のパフォーマンスを基に判断してください）
+
+簡潔かつ励ましになるようなポジティブな口調で、マークダウン形式で出力してください。
 
 トランスクリプト:
 ${logs}`;
