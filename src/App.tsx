@@ -214,7 +214,16 @@ function App() {
               <HelpCircle size={24} /> Documentation
             </h2>
             <div className="markdown-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.9rem' }}>
-              <ReactMarkdown>{readmeText}</ReactMarkdown>
+              <ReactMarkdown 
+                urlTransform={(uri) => uri.startsWith('public/') ? uri.replace('public/', '') : uri}
+                components={{
+                  img: ({ node, ...props }) => (
+                    <img {...props} style={{ maxWidth: '100%', borderRadius: '8px', border: '1px solid var(--border-color)', margin: '1.5rem 0' }} />
+                  )
+                }}
+              >
+                {readmeText}
+              </ReactMarkdown>
             </div>
           </div>
         )}
