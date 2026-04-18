@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, Edit3, Wand2, Mic, CheckCircle, FileText, ChevronRight, Globe } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import type { TopicState } from '../utils/topicStore';
 import LiveInterviewPanel from './LiveInterviewPanel';
 import { generateTopicScript, generateTopicFeedback } from '../utils/gemini';
@@ -201,8 +202,8 @@ Please ask me conversational questions about this topic, one at a time, and let 
                 <h4 style={{ margin: '0 0 1rem 0', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle size={18} /> 最新のフィードバック
                 </h4>
-                <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem', lineHeight: 1.6 }}>
-                  {topic.lastFeedback}
+                <div className="markdown-body" style={{ fontSize: '0.9rem', lineHeight: 1.6 }}>
+                  <ReactMarkdown>{topic.lastFeedback}</ReactMarkdown>
                 </div>
               </div>
             )}

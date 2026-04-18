@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, Mic2, AlertTriangle, FileAudio, Download } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { analyzeLessonAudioWithGemini } from '../utils/gemini';
 
 const MAX_FILE_SIZE_MB = 20;
@@ -143,14 +144,8 @@ export default function Coaching({ geminiApiKey, geminiModel }: { geminiApiKey?:
               <Download size={14} /> EXPORT
             </button>
           </h3>
-          <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7', fontFamily: "'Fira Code', monospace", color: 'var(--text-primary)' }}>
-            {/* Since simple markdown is returned, just pre-wrap is often perfect for CUI look */}
-            {report.split('\\n').map((line, i) => {
-              if (line.match(/^#+\s/)) return <h3 key={i} style={{ color: '#00ff41', marginTop: '1.5rem', marginBottom: '0.5rem' }}>{line}</h3>;
-              if (line.match(/^\d+\.\s/)) return <h4 key={i} style={{ color: '#00ff41', marginTop: '1.5rem', marginBottom: '0.5rem' }}>{line}</h4>;
-              if (line.startsWith('-')) return <div key={i} style={{ marginLeft: '1rem', marginBottom: '0.2rem' }}><span style={{ color: 'var(--brand-primary)' }}>-</span>{line.substring(1)}</div>;
-              return <div key={i}>{line || " "}</div>;
-            })}
+          <div className="markdown-body" style={{ color: 'var(--text-primary)', lineHeight: 1.6, fontSize: '0.9rem' }}>
+            <ReactMarkdown>{report}</ReactMarkdown>
           </div>
         </div>
       )}

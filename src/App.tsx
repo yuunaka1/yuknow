@@ -10,6 +10,7 @@ import GeminiLive from './components/GeminiLive';
 import CompositionTrainer from './components/CompositionTrainer';
 import GoTanakaKei from './components/GoTanakaKei';
 import FreeTalk from './components/FreeTalk';
+import ReactMarkdown from 'react-markdown';
 import readmeText from '../README.md?raw';
 import packageJson from '../package.json';
 import { lockVolumeStream } from './utils/audioLocker';
@@ -212,9 +213,9 @@ function App() {
             <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <HelpCircle size={24} /> Documentation
             </h2>
-            <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.85rem' }}>
-              {readmeText}
-            </pre>
+            <div className="markdown-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.9rem' }}>
+              <ReactMarkdown>{readmeText}</ReactMarkdown>
+            </div>
           </div>
         )}
       </main>

@@ -3,6 +3,7 @@ import { Mic, Globe, Loader, AlertTriangle, Coffee, LogOut, CheckCircle } from '
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { AudioStreamPlayer, AudioRecorder } from '../utils/audioUtils';
 import { generateFreeTalkFeedback } from '../utils/gemini';
+import ReactMarkdown from 'react-markdown';
 
 type LiveState = 'idle' | 'connecting' | 'listening' | 'processing' | 'speaking' | 'error';
 
@@ -351,8 +352,8 @@ Act like a natural, supportive English conversation partner. DO NOT just answer 
            <h3 style={{ margin: '0 0 1rem 0', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
              <CheckCircle size={20} /> Session Feedback
            </h3>
-           <div className="markdown-body" style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>
-             {feedback}
+           <div className="markdown-body" style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-primary)' }}>
+             <ReactMarkdown>{feedback}</ReactMarkdown>
            </div>
         </div>
       )}

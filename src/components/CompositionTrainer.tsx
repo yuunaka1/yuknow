@@ -3,6 +3,7 @@ import { Mic, Globe, AlertTriangle, GraduationCap, LogOut, Trash2, X, Loader } f
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { AudioStreamPlayer, AudioRecorder } from '../utils/audioUtils';
 import { generateReflexFeedback } from '../utils/gemini';
+import ReactMarkdown from 'react-markdown';
 
 type LiveState = 'idle' | 'connecting' | 'listening' | 'processing' | 'speaking' | 'error';
 type CEFRLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
@@ -473,8 +474,8 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
           <h4 style={{ margin: '0 0 1rem 0', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             Session Feedback
           </h4>
-          <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-primary)' }}>
-            {sessionFeedback}
+          <div className="markdown-body" style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-primary)' }}>
+            <ReactMarkdown>{sessionFeedback}</ReactMarkdown>
           </div>
         </div>
       )}
