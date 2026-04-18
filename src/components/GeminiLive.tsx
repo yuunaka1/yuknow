@@ -335,14 +335,15 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
       {/* Terminal Log */}
       <div style={{
         flex: 1,
-        padding: '1rem',
         backgroundColor: '#0a0a00',
         border: '1px solid #005000',
         borderRadius: '4px',
-        overflowY: 'auto',
-        fontFamily: "'Fira Code', monospace"
+        fontFamily: "'Fira Code', monospace",
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid #005000', backgroundColor: '#0a0a00', zIndex: 10 }}>
           <h3 style={{ fontSize: '0.9rem', color: '#005000', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             WS_LIVE_STREAM_LOG
           </h3>
@@ -356,9 +357,10 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
           )}
         </div>
         
-        {logs.length === 0 ? (
-          <div style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>&gt; Ready to establish WebSocket stream...</div>
-        ) : (
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
+          {logs.length === 0 ? (
+            <div style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>&gt; Ready to establish WebSocket stream...</div>
+          ) : (
           logs.map((log) => (
             <div 
               key={log.id} 
@@ -378,6 +380,7 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
           ))
         )}
         <div ref={logEndRef} />
+        </div>
       </div>
 
     </div>

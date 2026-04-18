@@ -386,7 +386,7 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
               fontSize: '0.85rem',
               outline: 'none',
               cursor: (appState === 'idle' || appState === 'error') ? 'pointer' : 'not-allowed',
-              maxWidth: '140px',
+              maxWidth: '90px',
               textOverflow: 'ellipsis'
             }}
           >
