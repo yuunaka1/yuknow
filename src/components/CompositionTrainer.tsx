@@ -141,7 +141,8 @@ Reflex Training Loop:
   - Provide a native alternative.
   - Speak your explanations in Japanese, but pronounce the English examples clearly in English.
 4. Immediately output the next Japanese sentence to translate.
-   CRITICAL: Again, ONLY say the Japanese sentence. Do NOT say anything else.
+   CRITICAL: If the user's previous translation was incorrect or unnatural, the NEXT Japanese sentence MUST test the exact same grammar pattern or phrase they struggled with, using a slightly different context (adaptive learning). If they translated perfectly, move on to a new distinct pattern.
+   CRITICAL: ONLY say the Japanese sentence. Do NOT say anything else.
 Do not break this loop. Keep feedback practical and short. Speak naturally.`;
 
         const setupMsg = {
