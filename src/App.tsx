@@ -58,6 +58,7 @@ function App() {
   const [geminiApiKey, setGeminiApiKey] = useLocalStorage('uknow_gemini_api_key', '');
   const [docId, setDocId] = useLocalStorage('uknow_doc_id', '');
   const [geminiModel, setGeminiModel] = useLocalStorage('uknow_gemini_model', 'gemini-3.1-flash-lite-preview');
+  const [geminiVoice, setGeminiVoice] = useLocalStorage('uknow_gemini_voice', 'Aoede');
   
   const isFlashcardConfigured = googleClientId && geminiApiKey && docId;
   const isShadowingConfigured = !!geminiApiKey;
@@ -153,6 +154,8 @@ function App() {
             setGeminiApiKey={setGeminiApiKey}
             geminiModel={geminiModel}
             setGeminiModel={setGeminiModel}
+            geminiVoice={geminiVoice}
+            setGeminiVoice={setGeminiVoice}
             docId={docId}
             setDocId={setDocId}
           />
@@ -181,15 +184,15 @@ function App() {
         )}
         
         {view === 'gemini_live' && geminiApiKey && (
-          <GeminiLive geminiApiKey={geminiApiKey} />
+          <GeminiLive geminiApiKey={geminiApiKey} geminiVoice={geminiVoice} />
         )}
         
         {view === 'composition' && geminiApiKey && (
-          <CompositionTrainer geminiApiKey={geminiApiKey} geminiModel={geminiModel} />
+          <CompositionTrainer geminiApiKey={geminiApiKey} geminiModel={geminiModel} geminiVoice={geminiVoice} />
         )}
         
         {view === 'gotanakakei' && geminiApiKey && (
-          <GoTanakaKei geminiApiKey={geminiApiKey} geminiModel={geminiModel} />
+          <GoTanakaKei geminiApiKey={geminiApiKey} geminiModel={geminiModel} geminiVoice={geminiVoice} />
         )}
         
         {view === 'help' && (

@@ -44,7 +44,7 @@ const GRAMMAR_THEMES = [
   { value: 'Comparisons', label: '比較' }
 ];
 
-export default function CompositionTrainer({ geminiApiKey, geminiModel }: { geminiApiKey: string, geminiModel: string }) {
+export default function CompositionTrainer({ geminiApiKey, geminiModel, geminiVoice }: { geminiApiKey: string, geminiModel: string, geminiVoice: string }) {
   const [appState, setAppState] = useState<LiveState>('idle');
   const [logs, setLogs] = useLocalStorage<LogMessage[]>('uknow_composition_logs', []);
   const [errorDetails, setErrorDetails] = useState("");
@@ -150,6 +150,13 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
             model: modelOverride,
             generationConfig: {
               responseModalities: ["AUDIO"],
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: {
+                    voiceName: geminiVoice
+                  }
+                }
+              }
             },
             systemInstruction: {
               parts: [{ text: systemPrompt }]

@@ -8,11 +8,12 @@ interface TopicWorkflowProps {
   topic: TopicState;
   geminiApiKey: string;
   geminiModel: string;
+  geminiVoice: string;
   onUpdate: (updated: Partial<TopicState>) => void;
   onClose: () => void;
 }
 
-export default function TopicWorkflow({ topic, geminiApiKey, geminiModel, onUpdate, onClose }: TopicWorkflowProps) {
+export default function TopicWorkflow({ topic, geminiApiKey, geminiModel, geminiVoice, onUpdate, onClose }: TopicWorkflowProps) {
   const [activeTab, setActiveTab] = useState<'phase1' | 'phase2' | 'phase3'>('phase1');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isInterviewing, setIsInterviewing] = useState(false);
@@ -117,6 +118,7 @@ Please ask me conversational questions about this topic, one at a time, and let 
             {isInterviewing ? (
               <LiveInterviewPanel 
                 geminiApiKey={geminiApiKey} 
+                geminiVoice={geminiVoice}
                 systemInstruction={jaInstruction} 
                 onSessionEnd={handleJaSessionEnd}
                 lang="ja"
@@ -212,6 +214,7 @@ Please ask me conversational questions about this topic, one at a time, and let 
             {isInterviewing ? (
               <LiveInterviewPanel 
                 geminiApiKey={geminiApiKey} 
+                geminiVoice={geminiVoice}
                 systemInstruction={enInstruction} 
                 onSessionEnd={handleEnPracticeEnd}
                 lang="en"

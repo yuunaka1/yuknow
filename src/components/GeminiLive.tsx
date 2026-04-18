@@ -15,7 +15,7 @@ interface LogMessage {
 import { AudioStreamPlayer, AudioRecorder } from '../utils/audioUtils';
 
 // --- Component ---
-export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
+export default function GeminiLive({ geminiApiKey, geminiVoice }: { geminiApiKey: string, geminiVoice: string }) {
   const [appState, setAppState] = useState<LiveState>('idle');
   const [logs, setLogs] = useLocalStorage<LogMessage[]>('uknow_geminilive_logs', []);
   const [errorDetails, setErrorDetails] = useState("");
@@ -99,6 +99,13 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
             model: modelOverride,
             generationConfig: {
               responseModalities: ["AUDIO"],
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: {
+                    voiceName: geminiVoice
+                  }
+                }
+              }
             },
             systemInstruction: {
               parts: [{

@@ -5,6 +5,8 @@ interface SettingsPanelProps {
   setGeminiApiKey: (val: string) => void;
   geminiModel: string;
   setGeminiModel: (val: string) => void;
+  geminiVoice: string;
+  setGeminiVoice: (val: string) => void;
   docId: string;
   setDocId: (val: string) => void;
 }
@@ -13,6 +15,7 @@ export default function SettingsPanel({
   googleClientId, setGoogleClientId,
   geminiApiKey, setGeminiApiKey,
   geminiModel, setGeminiModel,
+  geminiVoice, setGeminiVoice,
   docId, setDocId
 }: SettingsPanelProps) {
   
@@ -60,6 +63,28 @@ export default function SettingsPanel({
         </select>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
           Select the Gemini model you want to use for the AI features.
+        </p>
+      </div>
+
+      <div className="form-group">
+        <label className="form-label" htmlFor="geminiVoice">
+          Gemini Voice
+        </label>
+        <select 
+          id="geminiVoice"
+          className="form-input" 
+          value={geminiVoice}
+          onChange={(e) => setGeminiVoice(e.target.value)}
+          style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+        >
+          <option value="Aoede">Aoede</option>
+          <option value="Charon">Charon</option>
+          <option value="Fenrir">Fenrir</option>
+          <option value="Kore">Kore</option>
+          <option value="Puck">Puck</option>
+        </select>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
+          Select the voice used in Gemini Live modes (Monologue, Reflex, GoTanakaKei).
         </p>
       </div>
 

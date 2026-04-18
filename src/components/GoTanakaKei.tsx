@@ -8,9 +8,10 @@ import TopicWorkflow from './TopicWorkflow';
 interface GoTanakaKeiProps {
   geminiApiKey: string;
   geminiModel: string;
+  geminiVoice: string;
 }
 
-export default function GoTanakaKei({ geminiApiKey, geminiModel }: GoTanakaKeiProps) {
+export default function GoTanakaKei({ geminiApiKey, geminiModel, geminiVoice }: GoTanakaKeiProps) {
   const [topics, setTopics] = useLocalStorage<TopicState[]>('uknow_gotanakakei_topics', PRESET_TOPICS as TopicState[]);
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
 
@@ -90,6 +91,7 @@ export default function GoTanakaKei({ geminiApiKey, geminiModel }: GoTanakaKeiPr
         topic={activeTopic} 
         geminiApiKey={geminiApiKey} 
         geminiModel={geminiModel}
+        geminiVoice={geminiVoice}
         onUpdate={(updates) => handleUpdateTopic(activeTopic.id, updates)}
         onClose={() => setSelectedTopicId(null)}
       />

@@ -13,12 +13,13 @@ interface LogMessage {
 
 interface LiveInterviewPanelProps {
   geminiApiKey: string;
+  geminiVoice: string;
   systemInstruction: string;
   onSessionEnd: (userTranscript: string, allLogs: LogMessage[]) => void;
   lang?: 'ja' | 'en';
 }
 
-export default function LiveInterviewPanel({ geminiApiKey, systemInstruction, onSessionEnd, lang = 'ja' }: LiveInterviewPanelProps) {
+export default function LiveInterviewPanel({ geminiApiKey, geminiVoice, systemInstruction, onSessionEnd, lang = 'ja' }: LiveInterviewPanelProps) {
   const [appState, setAppState] = useState<LiveState>('idle');
   const [logs, setLogs] = useState<LogMessage[]>([]);
   const [errorDetails, setErrorDetails] = useState("");
@@ -77,7 +78,10 @@ export default function LiveInterviewPanel({ geminiApiKey, systemInstruction, on
         const setupMsg = {
           setup: {
             model: modelOverride,
-            generationConfig: { responseModalities: ["AUDIO"] },
+            generationConfig: { 
+              responseModalities: ["AUDIO"],
+              speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: geminiVoice } } }
+            },
             systemInstruction: { parts: [{ text: systemInstruction }] },
             inputAudioTranscription: {},
             outputAudioTranscription: {}
