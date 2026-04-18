@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-04-18
+
+### ✨ Major Features
+- **Reflex (瞬間英作文トレーニング)**: Gemini Multimodal Live APIを利用した新しい英語スピーキング特訓モードを実装しました (Issue #23)。
+  - 「CEFR A1〜C2」までのレベルを選択することで、指定難易度に合わせた日本語がAIから出題されるインタラクティブセッションを提供します。
+  - 英語で発話した直後に、「良かった点」「不自然な箇所の指摘」「ネイティブな別表現の提案」のフィードバックが音声で返ってくる連続トレーニングループを実現しました。
+- **Monologue Mode Refactoring**: 古い REST APIベースの `MonologueREST.tsx` コンポーネントを完全に削除し、超低遅延 Live API ベースのストリーミング版を正式な `Monologue` 機能として改名・統合しました。
+- `SettingsPanel` から、完全に非推奨・未使用となっていた `translationModel` の設定項目・状態管理をクリーンアップしました。
+- アプリ共通のインフラコード（24kHz スピーカー再生機構、16kHz マイク録音機構）を `src/utils/audioUtils.ts` へ抽出し、アーキテクチャの拡張性を改善しました。
+
 ## [1.6.0] - 2026-04-17
 
 ### 🚀 Major Features
