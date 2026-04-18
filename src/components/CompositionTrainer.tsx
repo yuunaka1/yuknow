@@ -58,7 +58,7 @@ export default function CompositionTrainer({ geminiApiKey, geminiModel }: { gemi
   const playerRef = useRef<AudioStreamPlayer | null>(null);
   const logEndRef = useRef<HTMLDivElement | null>(null);
   const wakeLockRef = useRef<any>(null);
-  const sessionStartIndexRef = useRef<number>(0);
+  const sessionStartAfterIdRef = useRef<string | null>(null);
 
   const modelOverride = "models/gemini-3.1-flash-live-preview";
 
@@ -105,7 +105,7 @@ export default function CompositionTrainer({ geminiApiKey, geminiModel }: { gemi
       setAppState('connecting');
       setErrorDetails("");
       setSessionFeedback("");
-      sessionStartIndexRef.current = logs.length;
+      sessionStartAfterIdRef.current = logs.length > 0 ? logs[logs.length - 1].id : null;
       playerRef.current = new AudioStreamPlayer();
       recorderRef.current = new AudioRecorder();
 
@@ -308,7 +308,13 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
   // A more robust way to trigger feedback capturing the latest logs at stop
   const performStop = () => {
      stopSession();
-     const recentLogs = logs.slice(sessionStartIndexRef.current);
+     
+     const startIndex = sessionStartAfterIdRef.current 
+        ? logs.findIndex(l => l.id === sessionStartAfterIdRef.current) + 1
+        : 0;
+     const validStartIndex = startIndex > 0 ? startIndex : 0;
+     
+     const recentLogs = logs.slice(validStartIndex);
      if (recentLogs.filter(l => l.sender === 'user').length > 0) {
         generateFeedback(recentLogs);
      }
