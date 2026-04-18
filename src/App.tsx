@@ -217,7 +217,7 @@ function App() {
               <ReactMarkdown 
                 urlTransform={(uri) => uri.startsWith('public/') ? uri.replace('public/', '') : uri}
                 components={{
-                  img: ({ node, ...props }) => (
+                  img: ({ ...props }) => (
                     <img {...props} style={{ maxWidth: '100%', borderRadius: '8px', border: '1px solid var(--border-color)', margin: '1.5rem 0' }} />
                   )
                 }}

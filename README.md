@@ -1,9 +1,9 @@
-# yuKnow (ShadowTerm Edition) 🕶️🟢
+# yuKnow 🕶️🟢
 
-🚀 **Play instantly on the web:** [https://yuunaka1.github.io/yuknow/](https://yuunaka1.github.io/yuknow/)
+🚀 **Learn English with AI:** [https://yuunaka1.github.io/yuknow/](https://yuunaka1.github.io/yuknow/)
 
-yuKnow は、**「自分の学習データを自分の管理下に置き、AIを自分の専任コーチにする」**ことをコンセプトにした、完全クライアントサイド動作の次世代語学学習プラットフォームです。
-高価なサブスクリプションやサーバーコストは一切不要。あなたの Gemini API キーひとつで、最高峰の AI 英会話環境が手に入ります。
+yuKnow は、 **「自分の学習データを自分の管理下に置き、AIを自分の専任コーチにする」** ことをコンセプトにした、完全クライアントサイド動作の次世代語学学習プラットフォームです。
+高価なサブスクリプションやサーバーコストは一切不要。 Gemini API キーひとつで、最高の AI 英会話環境が手に入ります。
 
 ![Settings](public/screenshots/settings.png)
 
