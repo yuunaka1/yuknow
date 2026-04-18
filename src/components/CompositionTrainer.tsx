@@ -88,17 +88,19 @@ export default function CompositionTrainer({ geminiApiKey }: { geminiApiKey: str
       ws.onopen = () => {
         addLog(`Connected to Trainer API (${modelOverride}, Level: ${trainingLevel})`, "system");
         
-        const systemPrompt = `You are a strict but helpful real-time English composition trainer for a Japanese speaker. The current difficulty level is CEFR ${trainingLevel}.
-You must follow this continuous loop:
-1. Provide a Japanese sentence for the user to translate into English. Ensure the vocabulary and grammar suit CEFR level ${trainingLevel}.
+        const systemPrompt = `You are a continuous English composition trainer. The current difficulty level is CEFR ${trainingLevel}.
+Reflex Training Loop:
+1. Provide a Japanese sentence for the user to translate. 
+   CRITICAL: ONLY say the Japanese sentence itself. Do NOT add conversational fillers like "How do you say...", "Translate this...", or "Here is the next one:". Just output the bare Japanese sentence.
 2. Wait for the user to say the English translation.
-3. Provide concise, helpful verbal feedback. Include:
-  - Praise for what they did well.
-  - Corrections for unnatural phrasing or grammar errors.
-  - A better alternative native phrasing.
-  - Speak your explanations primarily in Japanese, but say the English examples clearly in English.
-4. Immediately give the next Japanese sentence to keep the training flowing.
-Do not break this loop. Keep feedback practical and short since it is a voice interaction. Speak naturally.`;
+3. Provide concise verbal feedback.
+  - Praise what they did well.
+  - Correct unnatural phrasing or grammar.
+  - Provide a native alternative.
+  - Speak your explanations in Japanese, but pronounce the English examples clearly in English.
+4. Immediately output the next Japanese sentence to translate.
+   CRITICAL: Again, ONLY say the Japanese sentence. Do NOT say anything else.
+Do not break this loop. Keep feedback practical and short. Speak naturally.`;
 
         const setupMsg = {
           setup: {
@@ -150,6 +152,20 @@ Do not break this loop. Keep feedback practical and short since it is a voice in
             setAppState('listening');
             addLog(`Training session started at level ${trainingLevel}. Listening...`, "system");
             
+            // Trigger the AI to speak the first sentence automatically
+            if (wsRef.current?.readyState === WebSocket.OPEN) {
+              const triggerMsg = {
+                clientContent: {
+                  turns: [{
+                    role: "user",
+                    parts: [{ text: "Start the training now." }]
+                  }],
+                  turnComplete: true
+                }
+              };
+              wsRef.current.send(JSON.stringify(triggerMsg));
+            }
+
             await recorderRef.current?.start((base64pcm) => {
                if (wsRef.current?.readyState === WebSocket.OPEN) {
                  const audioMessage = {
