@@ -8,15 +8,16 @@ import ShadowingPlayer from './components/ShadowingPlayer';
 import Coaching from './components/Coaching';
 import GeminiLive from './components/GeminiLive';
 import CompositionTrainer from './components/CompositionTrainer';
+import GoTanakaKei from './components/GoTanakaKei';
 import readmeText from '../README.md?raw';
 import packageJson from '../package.json';
 
-type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'gemini_live' | 'composition' | 'help';
+type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'gemini_live' | 'composition' | 'gotanakakei' | 'help';
 
 function App() {
   const getViewFromHash = (): View => {
     const hash = window.location.hash.replace('#', '') as View;
-    const validViews: View[] = ['dashboard', 'settings', 'quiz', 'shadowing', 'coaching', 'gemini_live', 'composition', 'help'];
+    const validViews: View[] = ['dashboard', 'settings', 'quiz', 'shadowing', 'coaching', 'gemini_live', 'composition', 'gotanakakei', 'help'];
     if (hash === 'monologue' as any) return 'gemini_live'; // alias for backward comp / aesthetic
     if (hash === 'reflex' as any) return 'composition'; // alias
     return validViews.includes(hash) ? hash : 'settings';
@@ -96,11 +97,18 @@ function App() {
             <GraduationCap size={18} /> Reflex
           </button>
           <button 
+            className={`btn ${view === 'gotanakakei' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setView('gotanakakei')}
+            disabled={!geminiApiKey}
+          >
+            <BookOpen size={18} /> GoTanakaKei
+          </button>
+          <button 
             className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
             onClick={() => setView('dashboard')}
             disabled={!isFlashcardConfigured}
           >
-            <BookOpen size={18} /> Flashcards
+            <BrainCircuit size={18} /> Flashcards
           </button>
           <button 
             className={`btn ${view === 'settings' ? 'btn-primary' : 'btn-secondary'}`} 
@@ -162,6 +170,10 @@ function App() {
         
         {view === 'composition' && geminiApiKey && (
           <CompositionTrainer geminiApiKey={geminiApiKey} />
+        )}
+        
+        {view === 'gotanakakei' && geminiApiKey && (
+          <GoTanakaKei geminiApiKey={geminiApiKey} geminiModel={geminiModel} />
         )}
         
         {view === 'help' && (

@@ -205,3 +205,73 @@ Important rules:
     throw new Error("Failed to analyze lesson audio.");
   }
 }
+
+export async function generateTopicScript(apiKey: string, modelName: string, topicTitle: string, rawNotesJa: string): Promise<{ outline: string, script: string }> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: modelName });
+  
+  const prompt = `あなたはプロの英語スピーキング・コーチです。
+生徒が以下のトピックについて話すために書いた「日本語のメモ・壁打ち内容」から、整理された「構成案（日本語）」と、実践でそのまま使える「自然な口語調の英語スクリプト」を作成してください。
+
+トピック: ${topicTitle}
+
+生徒のメモ:
+${rawNotesJa}
+
+以下のJSON形式で出力してください。Markdownのコードブロックは不要です。
+{
+  "outline": "ここに日本語の構成案・話の展開のまとめ（数行の箇条書きなど）を入れる",
+  "script": "ここに、堅苦しすぎない自然な会話会話の英語スクリプトを入れる"
+}`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    let textResponse = response.text().trim();
+    if (textResponse.startsWith('\`\`\`')) {
+      textResponse = textResponse.replace(/^\`\`\`json/i, '').replace(/^\`\`\`/, '');
+      textResponse = textResponse.replace(/\`\`\`$/, '');
+    }
+    const parsed = JSON.parse(textResponse.trim());
+    return {
+      outline: parsed.outline || '',
+      script: parsed.script || ''
+    };
+  } catch (e) {
+    console.error("Gemini Script Generation error:", e);
+    throw new Error("Failed to generate topic script.");
+  }
+}
+
+export async function generateTopicFeedback(apiKey: string, modelName: string, topicTitle: string, userLogs: string): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: modelName });
+  
+  const prompt = `You are a friendly English speaking coach.
+I just practiced speaking about the topic: "${topicTitle}".
+Here is the transcript of my practice session:
+
+${userLogs}
+
+Please provide practical feedback on my English performance. Respond in Japanese but use English for examples.
+Please output plain text Markdown strictly using the following structure:
+
+### 1. 総評
+- 全体的な伝わりやすさや良かった点、改善できる方向性などの要約。
+
+### 2. より自然な表現へのブラッシュアップ
+- ピックアップした私の元の発言 : 修正案と、なぜそのように言うと自然なのかの解説。（3〜5個程度）
+
+### 3. 次回使えるオススメフレーズ
+- このトピックについて話す際によく使うネイティブの表現を3つ程度。`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (e) {
+    console.error("Gemini Topic Feedback error:", e);
+    throw new Error("Failed to generate practice feedback.");
+  }
+}
+

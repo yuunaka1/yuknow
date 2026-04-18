@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.8.0] - 2026-04-18
+### Added
+- **GoTanakaKei (Personal Topics Training)**: A new guided speaking practice feature.
+  - Choose from 16 preset topics (School, Job, Values, etc.) or add custom topics.
+  - Auto-generate structured Japanese outlines and natural English conversational scripts using AI based on your notes.
+  - Features real-time voice interview mode (Japanese) to brainstorm and gather notes.
+  - Features real-time voice practice mode (English) simulating a live conversation.
+  - Detailed grammar, styling, and fluency feedback.
+  - JSON state Export/Import for topic progress.
 All notable changes to this project will be documented in this file.
 
 ## [1.7.0] - 2026-04-18
