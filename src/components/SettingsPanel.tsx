@@ -78,10 +78,14 @@ export default function SettingsPanel({
           style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
         >
           <option value="Aoede">Aoede</option>
+          <option value="Callirrhoe">Callirrhoe</option>
           <option value="Charon">Charon</option>
           <option value="Fenrir">Fenrir</option>
           <option value="Kore">Kore</option>
+          <option value="Leda">Leda</option>
+          <option value="Orus">Orus</option>
           <option value="Puck">Puck</option>
+          <option value="Zephyr">Zephyr</option>
         </select>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
           Select the voice used in Gemini Live modes (Monologue, Reflex, GoTanakaKei).
