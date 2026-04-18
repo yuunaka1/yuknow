@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, BookOpen, BrainCircuit, Headphones, HelpCircle, MessageSquare, Zap, GraduationCap } from 'lucide-react';
+import { Settings, BrainCircuit, Headphones, HelpCircle, MessageSquare, Zap, GraduationCap, Mic, Coffee } from 'lucide-react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import SettingsPanel from './components/SettingsPanel';
 import Dashboard from './components/Dashboard';
@@ -9,16 +9,17 @@ import Coaching from './components/Coaching';
 import GeminiLive from './components/GeminiLive';
 import CompositionTrainer from './components/CompositionTrainer';
 import GoTanakaKei from './components/GoTanakaKei';
+import FreeTalk from './components/FreeTalk';
 import readmeText from '../README.md?raw';
 import packageJson from '../package.json';
 import { lockVolumeStream } from './utils/audioLocker';
 
-type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'gemini_live' | 'composition' | 'gotanakakei' | 'help';
+type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'gemini_live' | 'composition' | 'gotanakakei' | 'freetalk' | 'help';
 
 function App() {
   const getViewFromHash = (): View => {
     const hash = window.location.hash.replace('#', '') as View;
-    const validViews: View[] = ['dashboard', 'settings', 'quiz', 'shadowing', 'coaching', 'gemini_live', 'composition', 'gotanakakei', 'help'];
+    const validViews: View[] = ['dashboard', 'settings', 'quiz', 'shadowing', 'coaching', 'gemini_live', 'composition', 'gotanakakei', 'freetalk', 'help'];
     if (hash === 'monologue' as any) return 'gemini_live'; // alias for backward comp / aesthetic
     if (hash === 'reflex' as any) return 'composition'; // alias
     return validViews.includes(hash) ? hash : 'settings';
@@ -118,7 +119,14 @@ function App() {
             onClick={() => setView('gotanakakei')}
             disabled={!geminiApiKey}
           >
-            <BookOpen size={18} /> GoTanakaKei
+            <Mic size={18} /> Mock Interview
+          </button>
+          <button 
+            className={`btn ${view === 'freetalk' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setView('freetalk')}
+            disabled={!geminiApiKey}
+          >
+            <Coffee size={18} /> Free Talk
           </button>
           <button 
             className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
@@ -193,6 +201,10 @@ function App() {
         
         {view === 'gotanakakei' && geminiApiKey && (
           <GoTanakaKei geminiApiKey={geminiApiKey} geminiModel={geminiModel} geminiVoice={geminiVoice} />
+        )}
+        
+        {view === 'freetalk' && geminiApiKey && (
+          <FreeTalk geminiApiKey={geminiApiKey} geminiModel={geminiModel} geminiVoice={geminiVoice} />
         )}
         
         {view === 'help' && (

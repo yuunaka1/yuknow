@@ -301,3 +301,27 @@ ${logs}`;
   }
 }
 
+export async function generateFreeTalkFeedback(apiKey: string, modelName: string, logs: string): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: modelName });
+  
+  const prompt = `以下の会話ログは、ユーザーが英語のフリートーク練習をした記録です。
+このセッションの「総括フィードバック」を作成してください。
+以下の要素を含めてください：
+- 全体的な強み・良かった点・コミュニケーションの姿勢
+- さらに会話を自然に広げるためのアドバイス
+- より自然にするためのフレーズ提案・語彙の改善案（ユーザーの発言をピックアップして修正）
+簡潔かつ励ましになるようなポジティブな口調で、マークダウン形式で出力してください。
+
+トランスクリプト:
+${logs}`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (e) {
+    console.error("Gemini FreeTalk Feedback error:", e);
+    throw new Error("Failed to generate free talk feedback.");
+  }
+}
