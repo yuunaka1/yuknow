@@ -166,16 +166,21 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
               wsRef.current.send(JSON.stringify(triggerMsg));
             }
 
-            await recorderRef.current?.start((base64pcm) => {
-               if (wsRef.current?.readyState === WebSocket.OPEN) {
-                 const audioMessage = {
-                   realtimeInput: {
-                     audio: { mimeType: "audio/pcm;rate=16000", data: base64pcm }
-                   }
-                 };
-                 wsRef.current.send(JSON.stringify(audioMessage));
-               }
-            });
+            // Delay microphone streaming slightly to avoid a known race condition 1008 
+            // where realtimeInput streaming collides with the initial clientContent parsing.
+            setTimeout(async () => {
+              if (wsRef.current?.readyState !== WebSocket.OPEN) return;
+              await recorderRef.current?.start((base64pcm) => {
+                 if (wsRef.current?.readyState === WebSocket.OPEN) {
+                   const audioMessage = {
+                     realtimeInput: {
+                       audio: { mimeType: "audio/pcm;rate=16000", data: base64pcm }
+                     }
+                   };
+                   wsRef.current.send(JSON.stringify(audioMessage));
+                 }
+              });
+            }, 800);
           }
 
           if (payload.serverContent) {
