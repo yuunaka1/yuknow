@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, Globe, Loader, AlertTriangle, GraduationCap, LogOut, Trash2 } from 'lucide-react';
+import { Mic, Globe, AlertTriangle, GraduationCap, LogOut, Trash2, X, Loader } from 'lucide-react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { AudioStreamPlayer, AudioRecorder } from '../utils/audioUtils';
+import { generateReflexFeedback } from '../utils/gemini';
 
 type LiveState = 'idle' | 'connecting' | 'listening' | 'processing' | 'speaking' | 'error';
 type CEFRLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
@@ -43,18 +44,21 @@ const GRAMMAR_THEMES = [
   { value: 'Comparisons', label: '比較' }
 ];
 
-export default function CompositionTrainer({ geminiApiKey }: { geminiApiKey: string }) {
+export default function CompositionTrainer({ geminiApiKey, geminiModel }: { geminiApiKey: string, geminiModel: string }) {
   const [appState, setAppState] = useState<LiveState>('idle');
   const [logs, setLogs] = useLocalStorage<LogMessage[]>('uknow_composition_logs', []);
   const [errorDetails, setErrorDetails] = useState("");
   const [trainingLevel, setTrainingLevel] = useLocalStorage<CEFRLevel>('uknow_composition_level', 'B1');
   const [grammarTheme, setGrammarTheme] = useLocalStorage('uknow_composition_grammar', '');
+  const [sessionFeedback, setSessionFeedback] = useState<string>('');
+  const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false);
 
   const wsRef = useRef<WebSocket | null>(null);
   const recorderRef = useRef<AudioRecorder | null>(null);
   const playerRef = useRef<AudioStreamPlayer | null>(null);
   const logEndRef = useRef<HTMLDivElement | null>(null);
   const wakeLockRef = useRef<any>(null);
+  const sessionStartIndexRef = useRef<number>(0);
 
   const modelOverride = "models/gemini-3.1-flash-live-preview";
 
@@ -100,6 +104,8 @@ export default function CompositionTrainer({ geminiApiKey }: { geminiApiKey: str
     try {
       setAppState('connecting');
       setErrorDetails("");
+      setSessionFeedback("");
+      sessionStartIndexRef.current = logs.length;
       playerRef.current = new AudioStreamPlayer();
       recorderRef.current = new AudioRecorder();
 
@@ -261,7 +267,7 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
     playerRef.current = null;
     
     if (wsRef.current) {
-      wsRef.current.close();
+      wsRef.current.close(1000);
       wsRef.current = null;
     }
     
@@ -270,8 +276,43 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
       wakeLockRef.current = null;
     }
     
-    setAppState(prev => (prev !== 'idle' && prev !== 'error' ? 'idle' : prev));
-  }, []);
+    setAppState(prev => {
+      if (prev !== 'idle' && prev !== 'error') {
+         // trigger feedback generation
+         setTimeout(() => triggerFeedbackGeneration(), 100);
+         return 'idle';
+      }
+      return prev;
+    });
+  }, [logs]);
+
+  const triggerFeedbackGeneration = () => {
+    // Cannot access latest state directly in closure smoothly, so we use logs from outside dependency
+    // but React guarantees state if we use a ref or just rely on the effect. Let's do it directly.
+  };
+
+  const generateFeedback = useCallback(async (recentLogs: LogMessage[]) => {
+    setIsGeneratingFeedback(true);
+    setSessionFeedback('');
+    try {
+      const logsStr = recentLogs.map(l => `${l.sender === 'user' ? 'Me' : 'Coach'}: ${l.text}`).join('\n');
+      const feedback = await generateReflexFeedback(geminiApiKey, geminiModel, logsStr);
+      setSessionFeedback(feedback);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGeneratingFeedback(false);
+    }
+  }, [geminiApiKey, geminiModel]);
+
+  // A more robust way to trigger feedback capturing the latest logs at stop
+  const performStop = () => {
+     stopSession();
+     const recentLogs = logs.slice(sessionStartIndexRef.current);
+     if (recentLogs.filter(l => l.sender === 'user').length > 0) {
+        generateFeedback(recentLogs);
+     }
+  };
 
   useEffect(() => {
     return () => {
@@ -363,7 +404,7 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
             </button>
           ) : (
             <button 
-              onClick={stopSession}
+              onClick={performStop}
               style={{ ...btnBaseStyles, color: '#ff3333', backgroundColor: 'rgba(255, 51, 51, 0.1)' }}
             >
               <LogOut size={16} /> END
@@ -393,11 +434,35 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
       </div>
 
       {errorDetails && (
-         <div style={{ padding: '1rem', marginBottom: '2rem', color: '#ff3333', backgroundColor: 'rgba(255,0,0,0.1)', border: '1px solid #ff3333', borderRadius: '4px' }}>
+         <div style={{ padding: '1rem', marginBottom: '1rem', color: '#ff3333', backgroundColor: 'rgba(255,0,0,0.1)', border: '1px solid #ff3333', borderRadius: '4px' }}>
             <AlertTriangle size={18} style={{ marginBottom: '0.5rem' }}/>
             <br />
             {errorDetails}
          </div>
+      )}
+
+      {isGeneratingFeedback && (
+        <div style={{ padding: '1rem', marginBottom: '1rem', backgroundColor: 'rgba(0,204,255,0.05)', border: '1px solid #00ccff', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#00ccff' }}>
+          <Loader size={16} className="animate-spin" />
+          GENERATING SESSION FEEDBACK...
+        </div>
+      )}
+
+      {sessionFeedback && !isGeneratingFeedback && (
+        <div className="animate-fade-in" style={{ padding: '1.5rem', marginBottom: '1rem', backgroundColor: 'var(--success-bg)', border: '1px solid var(--success)', borderRadius: '8px', position: 'relative' }}>
+          <button 
+            onClick={() => setSessionFeedback('')}
+            style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'none', border: 'none', color: 'var(--success)', cursor: 'pointer', opacity: 0.7 }}
+          >
+            <X size={18} />
+          </button>
+          <h4 style={{ margin: '0 0 1rem 0', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            Session Feedback
+          </h4>
+          <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-primary)' }}>
+            {sessionFeedback}
+          </div>
+        </div>
       )}
 
       <div style={{

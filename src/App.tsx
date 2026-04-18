@@ -169,7 +169,7 @@ function App() {
         )}
         
         {view === 'composition' && geminiApiKey && (
-          <CompositionTrainer geminiApiKey={geminiApiKey} />
+          <CompositionTrainer geminiApiKey={geminiApiKey} geminiModel={geminiModel} />
         )}
         
         {view === 'gotanakakei' && geminiApiKey && (

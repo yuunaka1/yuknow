@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.10.0] - 2026-04-18
+### Added
+- **Reflex Session Feedback**: Automatically generates a reflective summary and feedback report immediately after ending a Reflex session. The feedback analyzes your strengths, weaknesses, and gives concrete suggestions based on your practice.
 ## [1.9.1] - 2026-04-18
 ### Changed
 - Translated Reflex Mode grammar theme labels to Japanese to optimize UI width.

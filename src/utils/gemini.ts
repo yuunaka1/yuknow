@@ -275,3 +275,29 @@ Please output plain text Markdown strictly using the following structure:
   }
 }
 
+export async function generateReflexFeedback(apiKey: string, modelName: string, logs: string): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: modelName });
+  
+  const prompt = `以下のトランスクリプトは、ユーザーが日本語の文を英語に翻訳し、スピーキング練習をした記録です。
+このセッションの「総括フィードバック」を作成してください。
+以下の要素を含めてください：
+- 全体的な強み・良かった点
+- 繰り返して間違えたポイントや文法の癖
+- より自然にするためのフレーズ提案・語彙の改善案
+- 次のステップへの具体的な提案
+簡潔かつ励ましになるような口調で、マークダウン形式で出力してください。
+
+トランスクリプト:
+${logs}`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (e) {
+    console.error("Gemini Reflex Feedback error:", e);
+    throw new Error("Failed to generate reflex feedback.");
+  }
+}
+
