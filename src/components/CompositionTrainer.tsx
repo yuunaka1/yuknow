@@ -284,7 +284,7 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
       }
       return prev;
     });
-  }, [logs]);
+  }, []);
 
   const triggerFeedbackGeneration = () => {
     // Cannot access latest state directly in closure smoothly, so we use logs from outside dependency
