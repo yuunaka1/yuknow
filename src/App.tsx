@@ -11,6 +11,7 @@ import CompositionTrainer from './components/CompositionTrainer';
 import GoTanakaKei from './components/GoTanakaKei';
 import readmeText from '../README.md?raw';
 import packageJson from '../package.json';
+import { lockVolumeStream } from './utils/audioLocker';
 
 type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'gemini_live' | 'composition' | 'gotanakakei' | 'help';
 
@@ -29,6 +30,21 @@ function App() {
     const handleHashChange = () => setView(getViewFromHash());
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  React.useEffect(() => {
+    const handleFirstInteraction = () => {
+      lockVolumeStream();
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
+    };
+    document.addEventListener('click', handleFirstInteraction);
+    document.addEventListener('touchstart', handleFirstInteraction);
+    
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
+    };
   }, []);
 
   React.useEffect(() => {
