@@ -31,12 +31,22 @@ Gemini Multimodal Live APIを用いた、超低遅延・双方向のリアルタ
 
 ### 5. Reflex (瞬間英作文トレーニング)
 Monologue と同じリアルタイム Live API ベースエンジンを利用した、「瞬間英作文（Instant English Composition）」ドリルモードです。
-- **CEFR レベル別トレーニング**: A1～C2の中から自分のレベルを設定すると、AIがそのレベルに最適化された日本語の短文を出題します。
 - **Interactive Feedback Loop**: AIの出題に対してユーザーが英語で回答すると、AIがすかさず「良かった点」「文法や不自然な箇所の指摘」「よりネイティブな別表現の提案」を日本語と英語を交えて音声で解説し、すぐに次の問題へ移行します。手を触れずに声だけでエンドレスにトレーニングを続けることが可能です。
 
-### 6. Serverless & Privacy First
-- 設定するAPIキー (Google Client ID, Gemini API Key) は `localStorage` にのみ保存され、開発者を含むいかなる外部サーバーにも送信されません。
-- 学習履歴や暗記スコアもすべてユーザーのブラウザ (IndexedDB) 内に留まります。
+### 6. GoTanakaKei (Mock Interview)
+特定のトピックについて英語で語るための「スクリプト構築」と、その後の「模擬インタビュー（Mock Interview）」をシームレスに行う特訓モードです。
+- **Topic Script Generation**: 日本語のメモや箇条書きを入力するだけで、Gemini が自然で話しやすい「英語のスクリプト」と「構成案」を自動生成します。
+- **Interactive Mock Interview**: 構築したスクリプトをベースに、Live APIを用いた音声AI面接官と対話練習を行います。セッション終了後には、より自然な表現への書き換えや総評を含むフィードバックを得られます。
+
+### 7. Dialogue (Free Talk)
+Live APIを用いた、台本のない完全なフリートークを通じた英会話練習モードです。
+- **CEFR レベル別調整**: ユーザー自身の英語力（A1〜C2）を自己申告することで、AIが使ってくる語彙レベルや話すスピードを自動調整します。
+- **Proactive Conversation**: AIは会話を終わらせず、常に新しいトピックの提案や掘り下げの質問を行い、ユーザーの英語スピーキング量を最大化させます。
+- **End-of-Session Feedback**: セッション終了時に全体のトランスクリプトを解析し、強みや文法の改善点、より自然なフレーズの提案を含む総括的なフィードバックを提示します。
+
+### 8. Serverless & Privacy First
+- 設定するAPIキーやデータはすべてブラウザの `localStorage` や `IndexedDB` に保存され、外部サーバーには送信されません（Gemini / Google APIとの直接通信のみ）。
+- **Global Voice Setting**: Settings から、AIの声を Aoede, Puck, Charon などの9種類の公式 Gemini Prebuilt Voice から自由に選択し、すべてのLiveモードで共通して適用させることができます。
 
 ---
 
@@ -45,7 +55,7 @@ Monologue と同じリアルタイム Live API ベースエンジンを利用し
 ### Prerequisites (前提条件)
 本アプリを利用するためには、ご自身で以下の2つのキーを取得する必要があります。
 1. **Google Client ID (OAuth 2.0)**: Google Cloud Console から取得 (Google Docs読み込み用)
-2. **Gemini API Key**: Google AI Studio から取得 (文字起こし・解析用)
+2. **Gemini API Key**: Google AI Studio から取得 (文字起こし・解析等の全機能用)
 
 ### Installation (ローカルや自前サーバーで動かしたい人向け)
 本アプリをローカル環境や、自身のサーバーでビルド・ホスティングしたい方向けの起動手順です。yuKnow は React + Vite で作られています。
@@ -72,13 +82,16 @@ npm run release:patch
 ## 🛠️ Usage Workflow
 
 1. **[Settings] タブでの初期設定**:
-   あらかじめ取得した `Google Client ID`, `Gemini API Key`, そして読み込みたい Google Docs の `Document ID` を入力します。
+   あらかじめ取得した `Google Client ID`, `Gemini API Key`, Docs ID を入力し、好みの `Gemini Voice` を選択します。
 2. **[Flashcards] タブで単語帳作成**:
-   「Launch AI Sync」を実行し、ノートから単語帳を生成します。その後、その日の復習タスク（Quiz）を開始します。
+   「Launch AI Sync」で単語帳を生成し、その日の復習タスク（Quiz）を開始します。
 3. **[Shadowing] / [Coaching] タブで発音・総合練習**:
-   手持ちのリスニング用MP3をロードして再生し、A-Bリピートで練習しつつ「AUTO REC」で自分の声を録音。AIからの厳しいフィードバックをもらって発音を改善したり、長尺な会話の録音から全体の詳細レポートを作成します。
-4. **[Monologue] / [Reflex] タブで実践スピーキング**:
-   WebSocket による低遅延リアルタイムAPIを利用し、日本語から英語への同時通訳によるシャドーイングや、瞬間英作文の無限ループ特訓を声だけでハンズフリーで行います。
+   MP3をロードして「AUTO REC」で録音し、AIから厳しいフィードバックをもらって発音を改善。
+4. **[Monologue] / [Reflex] タブで音声反復**:
+   同時通訳によるシャドーイングや、瞬間英作文の無限ループ特訓をハンズフリーで行います。
+5. **[GoTanakaKei] / [Dialogue] タブで実践スピーキング**:
+   トピックに基づいた面接練習や、自分のCEFRレベルに合わせたオープンエンドなフリートーク実践練習を行い、終了後に総括フィードバックで復習します。
 
 ## 📄 License
 This project is licensed under the [MIT License](LICENSE).
+
