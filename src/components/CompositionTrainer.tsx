@@ -402,14 +402,15 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
 
       <div style={{
         flex: 1,
-        padding: '1rem',
         backgroundColor: '#050a14',
         border: '1px solid #002244',
         borderRadius: '4px',
-        overflowY: 'auto',
-        fontFamily: "'Fira Code', monospace"
+        fontFamily: "'Fira Code', monospace",
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid #002244', backgroundColor: '#050a14', zIndex: 10 }}>
           <h3 style={{ fontSize: '0.9rem', color: '#0055aa', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             TRAINING_STREAM_LOG
           </h3>
@@ -423,9 +424,10 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
           )}
         </div>
         
-        {logs.length === 0 ? (
-          <div style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>&gt; Select a level and START to begin...</div>
-        ) : (
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
+          {logs.length === 0 ? (
+            <div style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>&gt; Select a level and START to begin...</div>
+          ) : (
           logs.map((log) => (
             <div 
               key={log.id} 
@@ -445,6 +447,7 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
           ))
         )}
         <div ref={logEndRef} />
+        </div>
       </div>
     </div>
   );
