@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, Globe, Loader, AlertTriangle, Zap, LogOut, Trash2 } from 'lucide-react';
+import { Mic, Globe, Loader, AlertTriangle, GraduationCap, LogOut, Trash2 } from 'lucide-react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { AudioStreamPlayer, AudioRecorder } from '../utils/audioUtils';
 
-// --- Types ---
 type LiveState = 'idle' | 'connecting' | 'listening' | 'processing' | 'speaking' | 'error';
+type CEFRLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
 
 interface LogMessage {
   id: string;
@@ -12,13 +13,11 @@ interface LogMessage {
   isStream?: boolean;
 }
 
-import { AudioStreamPlayer, AudioRecorder } from '../utils/audioUtils';
-
-// --- Component ---
-export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
+export default function CompositionTrainer({ geminiApiKey }: { geminiApiKey: string }) {
   const [appState, setAppState] = useState<LiveState>('idle');
-  const [logs, setLogs] = useLocalStorage<LogMessage[]>('uknow_geminilive_logs', []);
+  const [logs, setLogs] = useLocalStorage<LogMessage[]>('uknow_composition_logs', []);
   const [errorDetails, setErrorDetails] = useState("");
+  const [trainingLevel, setTrainingLevel] = useLocalStorage<CEFRLevel>('uknow_composition_level', 'B1');
 
   const wsRef = useRef<WebSocket | null>(null);
   const recorderRef = useRef<AudioRecorder | null>(null);
@@ -54,14 +53,12 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
   }, [setLogs]);
 
   const clearLogs = () => {
-    if (window.confirm("Clear Live session logs?")) setLogs([]);
+    if (window.confirm("Clear Session Logs?")) setLogs([]);
   };
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [logs]);
-
-
 
   const startSession = async () => {
     if (!geminiApiKey) {
@@ -75,7 +72,6 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
       playerRef.current = new AudioStreamPlayer();
       recorderRef.current = new AudioRecorder();
 
-      // Request Screen Wake Lock to prevent screen sleep
       if ('wakeLock' in navigator) {
         try {
           wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
@@ -85,15 +81,25 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
         }
       }
 
-      // 1. Establish WebSocket
       const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${geminiApiKey}`;
       const ws = new WebSocket(url);
       wsRef.current = ws;
 
       ws.onopen = () => {
-        addLog(`Connected to Multimodal Live API (${modelOverride})`, "system");
+        addLog(`Connected to Trainer API (${modelOverride}, Level: ${trainingLevel})`, "system");
         
-        // 2. Send Setup Message
+        const systemPrompt = `You are a strict but helpful real-time English composition trainer for a Japanese speaker. The current difficulty level is CEFR ${trainingLevel}.
+You must follow this continuous loop:
+1. Provide a Japanese sentence for the user to translate into English. Ensure the vocabulary and grammar suit CEFR level ${trainingLevel}.
+2. Wait for the user to say the English translation.
+3. Provide concise, helpful verbal feedback. Include:
+  - Praise for what they did well.
+  - Corrections for unnatural phrasing or grammar errors.
+  - A better alternative native phrasing.
+  - Speak your explanations primarily in Japanese, but say the English examples clearly in English.
+4. Immediately give the next Japanese sentence to keep the training flowing.
+Do not break this loop. Keep feedback practical and short since it is a voice interaction. Speak naturally.`;
+
         const setupMsg = {
           setup: {
             model: modelOverride,
@@ -101,9 +107,7 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
               responseModalities: ["AUDIO"],
             },
             systemInstruction: {
-              parts: [{
-                text: "You are a real-time bilingual interpreter. If the user speaks Japanese, translate it into natural spoken English. If the user speaks English, translate it into natural spoken Japanese. Speak only the exact translation. Do not answer questions, do not add filler words, and do not converse. Just echo the translated text in the target language."
-              }]
+              parts: [{ text: systemPrompt }]
             },
             inputAudioTranscription: {},
             outputAudioTranscription: {}
@@ -114,10 +118,10 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
 
       ws.onclose = (event) => {
         stopSession();
-        if (event.code !== 1000) { // Disconnected abnormally
+        if (event.code !== 1000) {
            let detail = "";
-           if (event.code === 1007) detail = "(1007: Unsupported Payload/Model Mismatch. Check if the model supports Live API.)";
-           addLog(`Disconnected from API (${event.code}) ${detail}`, "system");
+           if (event.code === 1007) detail = "(1007: Unsupported Payload/Model Mismatch.)";
+           addLog(`Disconnected (${event.code}) ${detail}`, "system");
            setErrorDetails(`Disconnect code: ${event.code} ${detail}`);
            setAppState('error');
         } else {
@@ -132,7 +136,6 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
       };
 
       ws.onmessage = async (event) => {
-        // Blob to JSON parsing if necessary, Gemini WS sometimes returns string or Blob.
         let msgStr = "";
         if (event.data instanceof Blob) {
            msgStr = await event.data.text();
@@ -143,12 +146,10 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
         try {
           const payload = JSON.parse(msgStr);
 
-          // Handle Setup Complete
           if (payload.setupComplete) {
             setAppState('listening');
-            addLog("Setup complete. Starting microphone...", "system");
+            addLog(`Training session started at level ${trainingLevel}. Listening...`, "system");
             
-            // Start recording and streaming!
             await recorderRef.current?.start((base64pcm) => {
                if (wsRef.current?.readyState === WebSocket.OPEN) {
                  const audioMessage = {
@@ -161,11 +162,9 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
             });
           }
 
-          // Handle Server Content (Responses)
           if (payload.serverContent) {
              const content = payload.serverContent;
              
-             // Interrupt event
              if (content.interrupted) {
                 addLog("Interrupted by user.", "system");
                 playerRef.current?.stop();
@@ -174,16 +173,14 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
                 setAppState('listening');
              }
 
-             // Model turn payload
              if (content.modelTurn) {
-                finalizeStream('user'); // User's turn naturally ends when model starts answering
+                finalizeStream('user');
                 if (content.modelTurn.parts) {
                    for (const part of content.modelTurn.parts) {
                      if (part.text) {
                         addLog(part.text, "model", true);
                      }
                      if (part.inlineData && part.inlineData.mimeType.startsWith("audio/pcm")) {
-                        // Play audio
                         setAppState('speaking');
                         await playerRef.current?.playPcmData(part.inlineData.data);
                      }
@@ -191,18 +188,14 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
                 }
              }
 
-             // Transcriptions
              if (content.inputTranscription && content.inputTranscription.text) {
-                // User's voice transcription chunks
                 addLog(content.inputTranscription.text, "user", true);
              }
              
              if (content.outputTranscription && content.outputTranscription.text) {
-                // Model's voice transcription chunks
                 addLog(content.outputTranscription.text, "model", true);
              }
              
-             // Turn complete
              if (content.turnComplete) {
                 setAppState('listening');
                 finalizeStream('model');
@@ -234,7 +227,6 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
       wsRef.current = null;
     }
     
-    // Release Screen Wake Lock
     if (wakeLockRef.current) {
       wakeLockRef.current.release().catch(console.warn);
       wakeLockRef.current = null;
@@ -243,13 +235,11 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
     setAppState(prev => (prev !== 'idle' && prev !== 'error' ? 'idle' : prev));
   }, []);
 
-  // Clean up on unmount
   useEffect(() => {
     return () => {
       stopSession();
     };
   }, [stopSession]);
-
 
   const btnBaseStyles = {
     padding: '0.5rem 1rem',
@@ -268,7 +258,7 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
   const statusColors = {
     idle: '#aaa',
     connecting: '#ffaa00',
-    listening: '#00ff41',
+    listening: '#00ccff',
     processing: 'var(--brand-primary)',
     speaking: 'var(--brand-primary)',
     error: '#ff3333'
@@ -278,17 +268,36 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
 
   return (
     <div className="animate-fade-in glass-panel" style={{ padding: 'clamp(1rem, 2vw, 1.5rem)', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 140px)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#00ff41', margin: 0, fontSize: '1.25rem' }}>
-          <Zap size={20} /> MONOLOGUE MODE
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#00ccff', margin: 0, fontSize: '1.25rem' }}>
+          <GraduationCap size={20} /> REFLEX
         </h2>
 
-        {/* Control Panel Inline */}
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <select
+            value={trainingLevel}
+            onChange={(e) => setTrainingLevel(e.target.value as CEFRLevel)}
+            disabled={appState !== 'idle' && appState !== 'error'}
+            style={{ 
+              padding: '0.4rem 0.5rem', 
+              borderRadius: '4px', 
+              backgroundColor: 'rgba(0, 204, 255, 0.1)', 
+              color: '#00ccff', 
+              border: '1px solid #00ccff', 
+              fontSize: '0.85rem',
+              outline: 'none',
+              cursor: (appState === 'idle' || appState === 'error') ? 'pointer' : 'not-allowed'
+            }}
+          >
+            {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map(level => (
+              <option key={level} value={level} style={{ backgroundColor: '#0a0a0a' }}>CEFR: {level}</option>
+            ))}
+          </select>
+
           {appState === 'idle' || appState === 'error' ? (
             <button 
               onClick={startSession}
-              style={{ ...btnBaseStyles, color: '#00ff41', backgroundColor: 'rgba(0, 255, 65, 0.1)' }}
+              style={{ ...btnBaseStyles, color: '#00ccff', backgroundColor: 'rgba(0, 204, 255, 0.1)' }}
             >
               <Mic size={16} /> START
             </button>
@@ -301,7 +310,6 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
             </button>
           )}
 
-          {/* State Indicator */}
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -332,19 +340,18 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
          </div>
       )}
 
-      {/* Terminal Log */}
       <div style={{
         flex: 1,
         padding: '1rem',
-        backgroundColor: '#0a0a00',
-        border: '1px solid #005000',
+        backgroundColor: '#050a14',
+        border: '1px solid #002244',
         borderRadius: '4px',
         overflowY: 'auto',
         fontFamily: "'Fira Code', monospace"
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ fontSize: '0.9rem', color: '#005000', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            WS_LIVE_STREAM_LOG
+          <h3 style={{ fontSize: '0.9rem', color: '#0055aa', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            TRAINING_STREAM_LOG
           </h3>
           {logs.length > 0 && (
             <button 
@@ -357,14 +364,14 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
         </div>
         
         {logs.length === 0 ? (
-          <div style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>&gt; Ready to establish WebSocket stream...</div>
+          <div style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>&gt; Select a level and START to begin...</div>
         ) : (
           logs.map((log) => (
             <div 
               key={log.id} 
               style={{
                 marginBottom: '0.5rem',
-                color: log.sender === 'model' ? '#00ff41' : log.sender === 'user' ? '#888' : '#005000',
+                color: log.sender === 'model' ? '#00ccff' : log.sender === 'user' ? '#888' : '#0055aa',
                 fontSize: '0.9rem',
                 fontStyle: log.sender === 'system' ? 'italic' : 'normal',
                 opacity: log.sender === 'system' ? 0.7 : 1,
@@ -379,7 +386,6 @@ export default function GeminiLive({ geminiApiKey }: { geminiApiKey: string }) {
         )}
         <div ref={logEndRef} />
       </div>
-
     </div>
   );
 }

@@ -5,8 +5,6 @@ interface SettingsPanelProps {
   setGeminiApiKey: (val: string) => void;
   geminiModel: string;
   setGeminiModel: (val: string) => void;
-  translationModel: string;
-  setTranslationModel: (val: string) => void;
   docId: string;
   setDocId: (val: string) => void;
 }
@@ -15,7 +13,6 @@ export default function SettingsPanel({
   googleClientId, setGoogleClientId,
   geminiApiKey, setGeminiApiKey,
   geminiModel, setGeminiModel,
-  translationModel, setTranslationModel,
   docId, setDocId
 }: SettingsPanelProps) {
   
@@ -63,25 +60,6 @@ export default function SettingsPanel({
         </select>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
           Select the Gemini model you want to use for the AI features.
-        </p>
-      </div>
-
-      <div className="form-group">
-        <label className="form-label" htmlFor="translationModel">
-          Live Translation Model
-        </label>
-        <select 
-          id="translationModel"
-          className="form-input" 
-          value={translationModel}
-          onChange={(e) => setTranslationModel(e.target.value)}
-          style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
-        >
-          <option value="gemini-2.5-flash-native-audio-preview-12-2025">gemini-2.5-flash-native-audio-preview-12-2025</option>
-          <option value="gemini-3.1-flash-tts-preview">gemini-3.1-flash-tts-preview</option>
-        </select>
-        <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
-          Specific model used for real-time WebSockets translation.
         </p>
       </div>
 

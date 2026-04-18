@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { Settings, BookOpen, BrainCircuit, Headphones, HelpCircle, MessageSquare, Globe, Zap } from 'lucide-react';
+import { Settings, BookOpen, BrainCircuit, Headphones, HelpCircle, MessageSquare, Zap, GraduationCap } from 'lucide-react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import SettingsPanel from './components/SettingsPanel';
 import Dashboard from './components/Dashboard';
 import Quiz from './components/Quiz';
 import ShadowingPlayer from './components/ShadowingPlayer';
 import Coaching from './components/Coaching';
-import MonologueREST from './components/MonologueREST';
 import GeminiLive from './components/GeminiLive';
+import CompositionTrainer from './components/CompositionTrainer';
 import readmeText from '../README.md?raw';
 import packageJson from '../package.json';
 
-type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'monologue2' | 'gemini_live' | 'help';
+type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'gemini_live' | 'composition' | 'help';
 
 function App() {
   const [view, setView] = useState<View>('settings');
@@ -20,7 +20,6 @@ function App() {
   const [geminiApiKey, setGeminiApiKey] = useLocalStorage('uknow_gemini_api_key', '');
   const [docId, setDocId] = useLocalStorage('uknow_doc_id', '');
   const [geminiModel, setGeminiModel] = useLocalStorage('uknow_gemini_model', 'gemini-3.1-flash-lite-preview');
-  const [translationModel, setTranslationModel] = useLocalStorage('uknow_translation_model', 'gemini-2.5-flash-native-audio-preview-12-2025');
   
   const isFlashcardConfigured = googleClientId && geminiApiKey && docId;
   const isShadowingConfigured = !!geminiApiKey;
@@ -60,18 +59,18 @@ function App() {
             <MessageSquare size={18} /> Coaching
           </button>
           <button 
-            className={`btn ${view === 'monologue2' ? 'btn-primary' : 'btn-secondary'}`} 
-            onClick={() => setView('monologue2')}
-            disabled={!geminiApiKey}
-          >
-            <Globe size={18} /> Monologue
-          </button>
-          <button 
             className={`btn ${view === 'gemini_live' ? 'btn-primary' : 'btn-secondary'}`} 
             onClick={() => setView('gemini_live')}
             disabled={!geminiApiKey}
           >
-            <Zap size={18} /> Live
+            <Zap size={18} /> Monologue
+          </button>
+          <button 
+            className={`btn ${view === 'composition' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setView('composition')}
+            disabled={!geminiApiKey}
+          >
+            <GraduationCap size={18} /> Reflex
           </button>
           <button 
             className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
@@ -107,8 +106,6 @@ function App() {
             setGeminiApiKey={setGeminiApiKey}
             geminiModel={geminiModel}
             setGeminiModel={setGeminiModel}
-            translationModel={translationModel}
-            setTranslationModel={setTranslationModel}
             docId={docId}
             setDocId={setDocId}
           />
@@ -136,12 +133,12 @@ function App() {
           <Coaching geminiApiKey={geminiApiKey} geminiModel={geminiModel} />
         )}
         
-        {view === 'monologue2' && geminiApiKey && (
-          <MonologueREST geminiApiKey={geminiApiKey} textModelName={geminiModel} title="MONOLOGUE" />
-        )}
-        
         {view === 'gemini_live' && geminiApiKey && (
           <GeminiLive geminiApiKey={geminiApiKey} />
+        )}
+        
+        {view === 'composition' && geminiApiKey && (
+          <CompositionTrainer geminiApiKey={geminiApiKey} />
         )}
         
         {view === 'help' && (
