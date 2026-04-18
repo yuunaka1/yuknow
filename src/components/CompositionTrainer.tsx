@@ -345,7 +345,8 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
               fontSize: '0.85rem',
               outline: 'none',
               cursor: (appState === 'idle' || appState === 'error') ? 'pointer' : 'not-allowed',
-              maxWidth: '200px'
+              maxWidth: '140px',
+              textOverflow: 'ellipsis'
             }}
           >
             {GRAMMAR_THEMES.map(theme => (
