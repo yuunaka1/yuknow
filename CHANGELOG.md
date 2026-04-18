@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.9.1] - 2026-04-18
+### Changed
+- Translated Reflex Mode grammar theme labels to Japanese to optimize UI width.
 ## [1.9.0] - 2026-04-18
 ### Added
 - **Reflex Grammar Theme Selection**: Added an optional dropdown to Reflex mode that allows users to pick a specific grammar target (e.g. Present Perfect, Passive Voice, Conditionals). When selected, Reflex prompts will naturally focus on reinforcing the chosen grammar.
