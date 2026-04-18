@@ -13,11 +13,42 @@ interface LogMessage {
   isStream?: boolean;
 }
 
+const GRAMMAR_THEMES = [
+  { value: '', label: 'Any Theme' },
+  { value: 'Sentences & 5 Basic Sentence Patterns', label: '5 Basic Sentence Patterns' },
+  { value: 'Parts of Speech', label: 'Parts of Speech' },
+  { value: 'Phrases, Clauses & Sentence Types', label: 'Phrases & Clauses' },
+  { value: 'Verbs', label: 'Verbs' },
+  { value: 'Present & Past Continuous Tense', label: 'Continuous Tense' },
+  { value: 'Future & Future Continuous Tense', label: 'Future Tense' },
+  { value: 'Perfect Tense', label: 'Perfect Tense' },
+  { value: 'Interrogative Sentences', label: 'Interrogative Sentences' },
+  { value: 'Imperative Sentences', label: 'Imperative Sentences' },
+  { value: '"There is/are" Structure', label: '"There is/are" Structure' },
+  { value: 'Modal Verbs', label: 'Modal Verbs' },
+  { value: 'Active & Passive Voice', label: 'Passive Voice' },
+  { value: 'Infinitives', label: 'Infinitives' },
+  { value: 'Gerunds', label: 'Gerunds' },
+  { value: 'Present & Past Participles', label: 'Participles' },
+  { value: 'Subjunctive Mood / Conditionals', label: 'Subjunctive / Conditionals' },
+  { value: 'Relative Clauses', label: 'Relative Clauses' },
+  { value: 'Prepositions', label: 'Prepositions' },
+  { value: 'Conjunctions', label: 'Conjunctions' },
+  { value: 'That-clauses & Wh-clauses', label: 'That/Wh-clauses' },
+  { value: 'Adjectives', label: 'Adjectives' },
+  { value: 'Adverbs', label: 'Adverbs' },
+  { value: 'Nouns', label: 'Nouns' },
+  { value: 'Pronouns', label: 'Pronouns' },
+  { value: 'Articles', label: 'Articles' },
+  { value: 'Comparisons', label: 'Comparisons' }
+];
+
 export default function CompositionTrainer({ geminiApiKey }: { geminiApiKey: string }) {
   const [appState, setAppState] = useState<LiveState>('idle');
   const [logs, setLogs] = useLocalStorage<LogMessage[]>('uknow_composition_logs', []);
   const [errorDetails, setErrorDetails] = useState("");
   const [trainingLevel, setTrainingLevel] = useLocalStorage<CEFRLevel>('uknow_composition_level', 'B1');
+  const [grammarTheme, setGrammarTheme] = useLocalStorage('uknow_composition_grammar', '');
 
   const wsRef = useRef<WebSocket | null>(null);
   const recorderRef = useRef<AudioRecorder | null>(null);
@@ -86,9 +117,14 @@ export default function CompositionTrainer({ geminiApiKey }: { geminiApiKey: str
       wsRef.current = ws;
 
       ws.onopen = () => {
-        addLog(`Connected to Trainer API (${modelOverride}, Level: ${trainingLevel})`, "system");
+        addLog(`Connected to Trainer API (Level: ${trainingLevel}${grammarTheme ? `, Theme: ${grammarTheme}` : ''})`, "system");
         
-        const systemPrompt = `You are a continuous English composition trainer. The current difficulty level is CEFR ${trainingLevel}.
+        const themeInstruction = grammarTheme ? `
+CRITICAL THEME INSTRUCTION:
+Focus the Japanese sentences and expected English translations heavily on the following grammar theme: "${grammarTheme}".
+Ensure the sentences naturally require using this grammar structure. In your feedback, briefly advise whether the user successfully used this target grammar.` : '';
+
+        const systemPrompt = `You are a continuous English composition trainer. The current difficulty level is CEFR ${trainingLevel}.${themeInstruction}
 Reflex Training Loop:
 1. Provide a Japanese sentence for the user to translate. 
    CRITICAL: ONLY say the Japanese sentence itself. Do NOT add conversational fillers like "How do you say...", "Translate this...", or "Here is the next one:". Just output the bare Japanese sentence.
@@ -293,6 +329,27 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
           >
             {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map(level => (
               <option key={level} value={level} style={{ backgroundColor: '#0a0a0a' }}>CEFR: {level}</option>
+            ))}
+          </select>
+          
+          <select
+            value={grammarTheme}
+            onChange={(e) => setGrammarTheme(e.target.value)}
+            disabled={appState !== 'idle' && appState !== 'error'}
+            style={{ 
+              padding: '0.4rem 0.5rem', 
+              borderRadius: '4px', 
+              backgroundColor: 'rgba(0, 204, 255, 0.1)', 
+              color: '#00ccff', 
+              border: '1px solid #00ccff', 
+              fontSize: '0.85rem',
+              outline: 'none',
+              cursor: (appState === 'idle' || appState === 'error') ? 'pointer' : 'not-allowed',
+              maxWidth: '200px'
+            }}
+          >
+            {GRAMMAR_THEMES.map(theme => (
+              <option key={theme.value} value={theme.value} style={{ backgroundColor: '#0a0a0a' }}>{theme.label}</option>
             ))}
           </select>
 
