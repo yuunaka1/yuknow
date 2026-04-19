@@ -141,6 +141,7 @@ Reflex Training Loop:
   - Correct unnatural phrasing or grammar.
   - Provide a native alternative.
   - Speak your explanations in Japanese, but pronounce the English examples clearly in English.
+  - CRITICAL RECUPERATION STEP: If the user's translation was incorrect or unnatural, first provide the correct English sentence, and then explicitely prompt the user to repeat the correct sentence aloud (e.g., "リピートしてみましょう: [Correct Sentence]"). You MUST wait for their repetition before moving to the next sentence.
 4. Immediately output the next Japanese sentence to translate.
    CRITICAL: If the user's previous translation was incorrect or unnatural, the NEXT Japanese sentence MUST test the exact same grammar pattern or phrase they struggled with, using a slightly different context (adaptive learning). If they translated perfectly, move on to a new distinct pattern.
    CRITICAL: ONLY say the Japanese sentence. Do NOT say anything else.
@@ -163,7 +164,12 @@ Do not break this loop. Keep feedback practical and short. Speak naturally.`;
               parts: [{ text: systemPrompt }]
             },
             inputAudioTranscription: {},
-            outputAudioTranscription: {}
+            outputAudioTranscription: {},
+            realtimeInputConfig: {
+              automaticActivityDetection: {
+                silenceDurationMs: 1200
+              }
+            }
           }
         };
         ws.send(JSON.stringify(setupMsg));

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.12.9] - 2026-04-19
+### Changed
+- **Reflex Mode Turn-Taking**: Adjusted the end-of-utterance silence threshold (`silenceDurationMs`) in the Live API configuration to wait longer before the AI responds. This reduces premature interruptions and gives the user more time to finish speaking.
+- **Reflex Repeat-after-Correction**: Improved the Reflex system prompt to explicitly require the AI to prompt the user to repeat the correct English sentence aloud after making a grammatical or phrasing mistake.
+
 ## [1.10.0] - 2026-04-18
 ### Added
 - **Reflex Session Feedback**: Automatically generates a reflective summary and feedback report immediately after ending a Reflex session. The feedback analyzes your strengths, weaknesses, and gives concrete suggestions based on your practice.
