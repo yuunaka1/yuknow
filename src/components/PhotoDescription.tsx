@@ -6,12 +6,12 @@ import ReactMarkdown from 'react-markdown';
 type PracticePhase = 'idle' | 'prep' | 'speaking' | 'evaluating' | 'result' | 'error';
 
 const SAMPLE_PHOTOS = [
-  { id: '1', url: '/photos/photo1.jpg', title: 'Office Meeting' },
-  { id: '2', url: '/photos/photo2.jpg', title: 'Airport Terminal' },
-  { id: '3', url: '/photos/photo3.jpg', title: 'Outdoor Cafe' },
-  { id: '4', url: '/photos/photo4.jpg', title: 'Construction Site' },
-  { id: '5', url: '/photos/photo5.jpg', title: 'Classroom Lecture' },
-  { id: '6', url: '/photos/photo6.jpg', title: 'Hotel Reception' },
+  { id: '1', url: './photos/photo1.jpg', title: 'Office Meeting' },
+  { id: '2', url: './photos/photo2.jpg', title: 'Airport Terminal' },
+  { id: '3', url: './photos/photo3.jpg', title: 'Outdoor Cafe' },
+  { id: '4', url: './photos/photo4.jpg', title: 'Construction Site' },
+  { id: '5', url: './photos/photo5.jpg', title: 'Classroom Lecture' },
+  { id: '6', url: './photos/photo6.jpg', title: 'Hotel Reception' },
 ];
 
 export default function PhotoDescription({ geminiApiKey, geminiModel }: { geminiApiKey: string, geminiModel: string }) {
