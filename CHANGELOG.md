@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.13.1] - 2026-04-21
+### Fixed
+- **Photo Description**: Fixed an issue where photo image links returned 404 on GitHub Pages by properly converting absolute asset paths to relative paths.
+
 ## [1.13.0] - 2026-04-21
 ### Added
 - **Photo Description Practice**: A new TOEIC Speaking-style guided training mode.
