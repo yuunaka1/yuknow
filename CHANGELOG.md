@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.13.0] - 2026-04-21
+### Added
+- **Photo Description Practice**: A new TOEIC Speaking-style guided training mode.
+  - Presents a TOEIC-style photo with a 45-second preparation timer and a 45-second speaking timer.
+  - Interacts with Gemini Multimodal API directly using the recorded browser audio and image data.
+  - Provides strict TOEIC-aligned feedback (transcription, fluency, missing details, grammar/vocabulary improvements, and a high-score model answer).
+
+### Changed
+- **Reflex Mode Context Diversity**: Drastically strengthened the system prompt to force the AI to switch to completely different contexts, vocabulary, and grammar situations whenever the user answers a training question perfectly, avoiding repetitive sentence structures.
+
 ## [1.12.9] - 2026-04-19
 ### Changed
 - **Reflex Mode Turn-Taking**: Adjusted the end-of-utterance silence threshold (`silenceDurationMs`) in the Live API configuration to wait longer before the AI responds. This reduces premature interruptions and gives the user more time to finish speaking.

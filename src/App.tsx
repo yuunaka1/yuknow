@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, BrainCircuit, Headphones, HelpCircle, MessageSquare, Zap, GraduationCap, Mic, Coffee } from 'lucide-react';
+import { Settings, BrainCircuit, Headphones, HelpCircle, MessageSquare, Zap, GraduationCap, Mic, Coffee, Camera } from 'lucide-react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import SettingsPanel from './components/SettingsPanel';
 import Dashboard from './components/Dashboard';
@@ -10,17 +10,18 @@ import GeminiLive from './components/GeminiLive';
 import CompositionTrainer from './components/CompositionTrainer';
 import GoTanakaKei from './components/GoTanakaKei';
 import FreeTalk from './components/FreeTalk';
+import PhotoDescription from './components/PhotoDescription';
 import ReactMarkdown from 'react-markdown';
 import readmeText from '../README.md?raw';
 import packageJson from '../package.json';
 import { lockVolumeStream } from './utils/audioLocker';
 
-type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'gemini_live' | 'composition' | 'gotanakakei' | 'freetalk' | 'help';
+type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'gemini_live' | 'composition' | 'gotanakakei' | 'freetalk' | 'photodesc' | 'help';
 
 function App() {
   const getViewFromHash = (): View => {
     const hash = window.location.hash.replace('#', '') as View;
-    const validViews: View[] = ['dashboard', 'settings', 'quiz', 'shadowing', 'coaching', 'gemini_live', 'composition', 'gotanakakei', 'freetalk', 'help'];
+    const validViews: View[] = ['dashboard', 'settings', 'quiz', 'shadowing', 'coaching', 'gemini_live', 'composition', 'gotanakakei', 'freetalk', 'photodesc', 'help'];
     if (hash === 'monologue' as any) return 'gemini_live'; // alias for backward comp / aesthetic
     if (hash === 'reflex' as any) return 'composition'; // alias
     return validViews.includes(hash) ? hash : 'settings';
@@ -130,6 +131,13 @@ function App() {
             <Coffee size={18} /> Dialogue
           </button>
           <button 
+            className={`btn ${view === 'photodesc' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setView('photodesc')}
+            disabled={!geminiApiKey}
+          >
+            <Camera size={18} /> Describe
+          </button>
+          <button 
             className={`btn ${view === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
             onClick={() => setView('dashboard')}
             disabled={!isFlashcardConfigured}
@@ -206,6 +214,10 @@ function App() {
         
         {view === 'freetalk' && geminiApiKey && (
           <FreeTalk geminiApiKey={geminiApiKey} geminiModel={geminiModel} geminiVoice={geminiVoice} />
+        )}
+
+        {view === 'photodesc' && geminiApiKey && (
+          <PhotoDescription geminiApiKey={geminiApiKey} geminiModel={geminiModel} />
         )}
         
         {view === 'help' && (

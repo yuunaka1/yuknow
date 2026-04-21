@@ -329,3 +329,61 @@ ${logs}`;
     throw new Error("Failed to generate free talk feedback.");
   }
 }
+
+export async function evaluatePhotoDescriptionWithGemini(apiKey: string, imageBlob: Blob, audioBlob: Blob, modelName: string): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: modelName });
+  
+  const imageBase64 = await blobToBase64(imageBlob);
+  const audioBase64 = await blobToBase64(audioBlob);
+
+  const prompt = `You are an expert TOEIC Speaking test examiner and English coach.
+I have provided a photo and an audio recording of my spoken description of this photo.
+
+Please evaluate my photo description (TOEIC Speaking format, ~45 seconds).
+Listen to my audio to evaluate my fluency, pronunciation, and content, and compare it against the provided photo.
+
+Respond entirely in Japanese (but use English for examples and transcript). Please output plain text Markdown strictly using the following structure:
+
+### 1. トランスクリプト (What you said)
+- [Provide a precise transcription of my English speech]
+
+### 2. 総括フィードバック (Overall Feedback)
+- Did I organize the description logically? (e.g., general picture -> details -> background)
+- Did I speak fluently with good pace?
+- What were my strengths?
+
+### 3. 要注意・改善ポイント (Areas for Improvement)
+- 指摘すべき不自然な文法や単語のミス (Grammar/Vocab corrections)
+- 「もっとこう言えばテストで高得点になる」という実践的なアドバイス
+- 写真の重要な部分で、私が言いそびれていた情報があれば指摘
+
+### 4. より自然な表現への修正 (Phrasing Corrections)
+- [元の発言] -> [より自然でTOEICらしい表現] の形式で3箇所ほど修正案を提示してください。
+
+### 5. 模範解答例 (Model Answer)
+- Provide a clear, natural, and highly articulate model answer that a high-scoring test taker might say in 45 seconds. Keep it realistic for spoken English (about 5-7 sentences).`;
+
+  try {
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          data: imageBase64,
+          mimeType: imageBlob.type || 'image/jpeg'
+        }
+      },
+      {
+        inlineData: {
+          data: audioBase64,
+          mimeType: audioBlob.type || 'audio/webm' // Or whatever recording format is chosen
+        }
+      },
+      { text: prompt }
+    ]);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (e) {
+    console.error("Gemini Photo Description Evaluation error:", e);
+    throw new Error("Failed to evaluate photo description.");
+  }
+}
