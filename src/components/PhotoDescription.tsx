@@ -227,29 +227,27 @@ export default function PhotoDescription({ geminiApiKey, geminiModel }: { gemini
                 onLoad={() => console.log('Image loaded')}
               />
             )}
-            
-            {/* Timer Overlay */}
-            {(phase === 'prep' || phase === 'speaking') && (
-              <div style={{
-                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                backgroundColor: 'rgba(0,0,0,0.3)',
-                display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-                color: 'white'
-              }}>
-                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '2px', background: 'rgba(0,0,0,0.6)', padding: '0.5rem 1rem', borderRadius: '4px', marginBottom: '1rem', color: mainColor }}>
-                   {phase === 'prep' ? 'PREPARATION TIME' : 'SPEAKING TIME'}
-                 </div>
-                 <div style={{ fontSize: '4rem', fontWeight: 'bold', fontFamily: 'monospace', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
-                   00:{timeLeft.toString().padStart(2, '0')}
-                 </div>
-                 
-                 {/* Progress Bar under time */}
-                 <div style={{ width: '60%', height: '6px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '3px', marginTop: '1rem', overflow: 'hidden' }}>
-                    <div style={{ width: `${progressPercent}%`, height: '100%', backgroundColor: mainColor, transition: 'width 1s linear' }} />
-                 </div>
-              </div>
-            )}
           </div>
+          
+          {/* Timer Display */}
+          {(phase === 'prep' || phase === 'speaking') && (
+            <div style={{
+              display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+              backgroundColor: '#050a14', border: `1px solid ${mainColor}`, borderRadius: '8px', padding: '1rem',
+              color: 'white',
+              boxShadow: `0 0 15px ${mainColor}22`
+            }}>
+               <div style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '2px', color: mainColor, marginBottom: '0.5rem' }}>
+                 {phase === 'prep' ? 'PREPARATION TIME' : 'SPEAKING TIME'}
+               </div>
+               <div style={{ fontSize: '3rem', fontWeight: 'bold', fontFamily: 'monospace', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+                 00:{timeLeft.toString().padStart(2, '0')}
+               </div>
+               <div style={{ width: '80%', height: '6px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '3px', marginTop: '0.5rem', overflow: 'hidden' }}>
+                  <div style={{ width: `${progressPercent}%`, height: '100%', backgroundColor: mainColor, transition: 'width 1s linear' }} />
+               </div>
+            </div>
+          )}
           
           {/* Controls Below Photo */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
