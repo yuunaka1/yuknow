@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.14.0] - 2026-04-22
+### Added
+- **Infinite Dynamic AI Photo Generation**: Photo Description mode now dynamically generates infinite, completely unique TOEIC-style stock photos on-demand.
+  - Leverages a two-step AI chain: Gemini Generative API writes a photographic prompt, which is then rendered by Pollinations AI silently in the background.
+
 ## [1.13.1] - 2026-04-21
 ### Fixed
 - **Photo Description**: Fixed an issue where photo image links returned 404 on GitHub Pages by properly converting absolute asset paths to relative paths.

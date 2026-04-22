@@ -387,3 +387,28 @@ Respond entirely in Japanese (but use English for examples and transcript). Plea
     throw new Error("Failed to evaluate photo description.");
   }
 }
+
+export async function generateToeicImagePrompt(apiKey: string, modelName: string): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: modelName });
+  
+  const prompt = `You are a creative director for an English language exam.
+Please generate a single, highly detailed English prompt describing a photorealistic everyday scene that would be perfect for a TOEIC Speaking "Describe a Picture" task.
+The scene should feature people doing regular activities (e.g., waiting at an airport, working in a modern office, shopping in a grocery store, eating at an outdoor cafe, attending a meeting, or construction workers on site).
+Include details about the setting, lighting, people's actions, and objects around them.
+
+Rules:
+- Make it around 20 to 30 words.
+- Output ONLY the prompt text, nothing else.
+- Ensure the scene is completely random and different every time.
+- Start directly with the description (e.g. "A photorealistic image of...").`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (e) {
+    console.error("Gemini Image Prompt Generation error:", e);
+    throw new Error("Failed to generate image prompt.");
+  }
+}

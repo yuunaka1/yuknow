@@ -1,22 +1,14 @@
-import { useState, useRef, useEffect } from 'react';
-import { Camera, Mic, Play, Square, RefreshCcw, Loader, AlertTriangle, FileText } from 'lucide-react';
-import { evaluatePhotoDescriptionWithGemini } from '../utils/gemini';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Camera, Mic, Play, Square, RefreshCcw, Loader, AlertTriangle, FileText, ImageIcon } from 'lucide-react';
+import { evaluatePhotoDescriptionWithGemini, generateToeicImagePrompt } from '../utils/gemini';
 import ReactMarkdown from 'react-markdown';
 
 type PracticePhase = 'idle' | 'prep' | 'speaking' | 'evaluating' | 'result' | 'error';
 
-const SAMPLE_PHOTOS = [
-  { id: '1', url: './photos/photo1.jpg', title: 'Office Meeting' },
-  { id: '2', url: './photos/photo2.jpg', title: 'Airport Terminal' },
-  { id: '3', url: './photos/photo3.jpg', title: 'Outdoor Cafe' },
-  { id: '4', url: './photos/photo4.jpg', title: 'Construction Site' },
-  { id: '5', url: './photos/photo5.jpg', title: 'Classroom Lecture' },
-  { id: '6', url: './photos/photo6.jpg', title: 'Hotel Reception' },
-];
-
 export default function PhotoDescription({ geminiApiKey, geminiModel }: { geminiApiKey: string, geminiModel: string }) {
   const [phase, setPhase] = useState<PracticePhase>('idle');
-  const [currentPhoto, setCurrentPhoto] = useState(SAMPLE_PHOTOS[0]);
+  const [currentPhoto, setCurrentPhoto] = useState({ url: '', title: '' });
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [errorMsg, setErrorMsg] = useState("");
   const [resultMarkdown, setResultMarkdown] = useState("");
@@ -29,28 +21,51 @@ export default function PhotoDescription({ geminiApiKey, geminiModel }: { gemini
   // Timer reference
   const timerRef = useRef<number | null>(null);
 
-  // Clean timer on unmount
-  useEffect(() => {
-    return () => clearInterval(timerRef.current!);
-  }, []);
+  const generateNewPhoto = useCallback(async () => {
+    if (!geminiApiKey) return;
+    setIsGeneratingImage(true);
+    setErrorMsg('');
+    try {
+      // 1. Ask Gemini to come up with a creative TOEIC scene prompt
+      const prompt = await generateToeicImagePrompt(geminiApiKey, geminiModel);
+      
+      // 2. Fetch the image from Pollinations AI using the generated prompt
+      const encodedPrompt = encodeURIComponent(prompt);
+      const cacheBuster = Math.floor(Math.random() * 1000000);
+      const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=600&nologo=true&seed=${cacheBuster}`;
+      
+      setCurrentPhoto({ url, title: prompt });
+      setPhase('idle');
+      setResultMarkdown("");
+    } catch (e: any) {
+      console.error(e);
+      setErrorMsg("画像の生成に失敗しました: " + e.message);
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  }, [geminiApiKey, geminiModel]);
 
-  const getRandomPhoto = () => {
-    const available = SAMPLE_PHOTOS.filter(p => p.id !== currentPhoto.id);
-    const random = available[Math.floor(Math.random() * available.length)];
-    setCurrentPhoto(random);
-    setPhase('idle');
-    setResultMarkdown("");
-  };
+  // Generate initial photo on mount
+  useEffect(() => {
+    let mounted = true;
+    if (mounted && !currentPhoto.url && !isGeneratingImage) {
+      generateNewPhoto();
+    }
+    return () => {
+      mounted = false;
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [currentPhoto.url, generateNewPhoto, isGeneratingImage]);
 
   const startPrep = () => {
     setPhase('prep');
     setTimeLeft(45); // 45 seconds prep
     
-    clearInterval(timerRef.current!);
+    if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = window.setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          clearInterval(timerRef.current!);
+          if (timerRef.current) clearInterval(timerRef.current);
           startSpeaking();
           return 0;
         }
@@ -84,11 +99,11 @@ export default function PhotoDescription({ geminiApiKey, geminiModel }: { gemini
       setPhase('speaking');
       setTimeLeft(45); // 45 seconds speak
 
-      clearInterval(timerRef.current!);
+      if (timerRef.current) clearInterval(timerRef.current);
       timerRef.current = window.setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
-            clearInterval(timerRef.current!);
+            if (timerRef.current) clearInterval(timerRef.current);
             stopSpeaking();
             return 0;
           }
@@ -104,7 +119,7 @@ export default function PhotoDescription({ geminiApiKey, geminiModel }: { gemini
   };
 
   const stopTimer = () => {
-     clearInterval(timerRef.current!);
+     if (timerRef.current) clearInterval(timerRef.current);
   }
 
   const stopSpeaking = () => {
@@ -120,11 +135,11 @@ export default function PhotoDescription({ geminiApiKey, geminiModel }: { gemini
   const processEvaluation = async (audioBlob: Blob) => {
     setPhase('evaluating');
     try {
-      // 1. Fetch the image to get a blob
+      // Fetch the generated AI image to get a blob for Gemini Multimodal API evaluation
+      // Using an empty cors object or just fetching again usually works with pollinations because it allows cors
       const imgResponse = await fetch(currentPhoto.url);
       const imgBlob = await imgResponse.blob();
 
-      // 2. Transcribe and evaluate multimodally via our new gemini function
       const evaluation = await evaluatePhotoDescriptionWithGemini(
         geminiApiKey,
         imgBlob,
@@ -134,8 +149,6 @@ export default function PhotoDescription({ geminiApiKey, geminiModel }: { gemini
       
       setResultMarkdown(evaluation);
       setPhase('result');
-      
-      // Save history logic here if needed (e.g., using localStorage)
 
     } catch (e: any) {
       console.error(e);
@@ -169,11 +182,13 @@ export default function PhotoDescription({ geminiApiKey, geminiModel }: { gemini
         
         {phase === 'result' && (
            <button 
-             onClick={getRandomPhoto}
+             onClick={generateNewPhoto}
              className="btn btn-secondary"
              style={{ fontSize: '0.85rem' }}
+             disabled={isGeneratingImage}
            >
-             <RefreshCcw size={16} /> NEXT PHOTO
+             {isGeneratingImage ? <Loader size={16} className="animate-spin" /> : <ImageIcon size={16} />} 
+             {isGeneratingImage ? ' GENERATING...' : ' NEXT PHOTO'}
            </button>
         )}
       </div>
@@ -199,11 +214,20 @@ export default function PhotoDescription({ geminiApiKey, geminiModel }: { gemini
             position: 'relative',
             boxShadow: `0 0 15px ${(phase === 'prep' || phase === 'speaking') ? mainColor + '44' : 'transparent'}`
           }}>
-            <img 
-              src={currentPhoto.url} 
-              alt={currentPhoto.title} 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            {isGeneratingImage || !currentPhoto.url ? (
+              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'var(--brand-primary)' }}>
+                <Loader size={36} className="animate-spin" style={{ marginBottom: '1rem' }} />
+                <span>AI Generating New Picture...</span>
+              </div>
+            ) : (
+              <img 
+                src={currentPhoto.url} 
+                alt="TOEIC Scene" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onLoad={() => console.log('Image loaded')}
+              />
+            )}
+            
             {/* Timer Overlay */}
             {(phase === 'prep' || phase === 'speaking') && (
               <div style={{
@@ -231,23 +255,23 @@ export default function PhotoDescription({ geminiApiKey, geminiModel }: { gemini
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
             {phase === 'idle' && (
               <>
-                <button className="btn btn-primary" onClick={startPrep} style={{ padding: '0.75rem 2rem' }}>
+                <button className="btn btn-primary" onClick={startPrep} disabled={isGeneratingImage || !currentPhoto.url} style={{ padding: '0.75rem 2rem' }}>
                   <Play size={18} /> START PRACTICE
                 </button>
-                <button className="btn btn-secondary" onClick={getRandomPhoto} title="Change Photo">
-                  <RefreshCcw size={18} />
+                <button className="btn btn-secondary" onClick={generateNewPhoto} disabled={isGeneratingImage} title="Generate Another Photo">
+                  <RefreshCcw size={18} className={isGeneratingImage ? "animate-spin" : ""} />
                 </button>
               </>
             )}
             
             {phase === 'prep' && (
-              <button className="btn btn-primary" onClick={() => { clearInterval(timerRef.current!); startSpeaking(); }} style={{ padding: '0.75rem 2rem', backgroundColor: '#00ccff', color: 'black' }}>
+              <button className="btn btn-primary" onClick={() => { if (timerRef.current) clearInterval(timerRef.current); startSpeaking(); }} style={{ padding: '0.75rem 2rem', backgroundColor: '#00ccff', color: 'black' }}>
                 <Mic size={18} /> SKIP PREP (SPEAK NOW)
               </button>
             )}
             
             {phase === 'speaking' && (
-              <button className="btn btn-secondary" onClick={() => { clearInterval(timerRef.current!); stopSpeaking(); }} style={{ padding: '0.75rem 2rem', color: '#ff3333', borderColor: '#ff3333' }}>
+              <button className="btn btn-secondary" onClick={() => { if (timerRef.current) clearInterval(timerRef.current); stopSpeaking(); }} style={{ padding: '0.75rem 2rem', color: '#ff3333', borderColor: '#ff3333' }}>
                 <Square size={18} /> FINISH EARLY
               </button>
             )}
@@ -284,6 +308,11 @@ export default function PhotoDescription({ geminiApiKey, geminiModel }: { gemini
                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'var(--text-tertiary)', opacity: 0.5 }}>
                  <FileText size={48} style={{ marginBottom: '1rem' }} />
                  <p>Your performance feedback will appear here.</p>
+                 {currentPhoto.title && phase === 'idle' && !isGeneratingImage && (
+                    <div style={{ marginTop: '2rem', fontSize: '0.8rem', fontStyle: 'italic', maxWidth: '80%', textAlign: 'center' }}>
+                       (AI Generated Scene Prompt for Context: "{currentPhoto.title}")
+                    </div>
+                 )}
                </div>
             )}
             {resultMarkdown && (
