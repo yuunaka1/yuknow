@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.0] - 2026-05-09
+### Added
+- **Tuning Mode (Pronunciation Training)**: Added a new real-time pronunciation training mode (formerly requested as Pronunciation mode).
+  - Features an interactive turn-based loop that presents English sentences focused on specific pronunciation themes (e.g., R/L, Intonation, Word Stress).
+  - Connects to the Gemini Multimodal Live API to provide immediate, concise AI feedback in Japanese evaluating the user's spoken pronunciation.
+  - Generates an end-of-session reflective summary providing actionable advice on targeted sounds.
+
 ## [1.14.0] - 2026-04-22
 ### Added
 - **Infinite Dynamic AI Photo Generation**: Photo Description mode now dynamically generates infinite, completely unique TOEIC-style stock photos on-demand.

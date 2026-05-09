@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, BrainCircuit, Headphones, HelpCircle, MessageSquare, Zap, GraduationCap, Mic, Coffee, Camera } from 'lucide-react';
+import { Settings, BrainCircuit, Headphones, HelpCircle, MessageSquare, Zap, GraduationCap, Mic, Coffee, Camera, Volume2 } from 'lucide-react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import SettingsPanel from './components/SettingsPanel';
 import Dashboard from './components/Dashboard';
@@ -11,17 +11,18 @@ import CompositionTrainer from './components/CompositionTrainer';
 import GoTanakaKei from './components/GoTanakaKei';
 import FreeTalk from './components/FreeTalk';
 import PhotoDescription from './components/PhotoDescription';
+import PronunciationTrainer from './components/PronunciationTrainer';
 import ReactMarkdown from 'react-markdown';
 import readmeText from '../README.md?raw';
 import packageJson from '../package.json';
 import { lockVolumeStream } from './utils/audioLocker';
 
-type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'gemini_live' | 'composition' | 'gotanakakei' | 'freetalk' | 'photodesc' | 'help';
+type View = 'dashboard' | 'settings' | 'quiz' | 'shadowing' | 'coaching' | 'gemini_live' | 'composition' | 'gotanakakei' | 'freetalk' | 'photodesc' | 'tuning' | 'help';
 
 function App() {
   const getViewFromHash = (): View => {
     const hash = window.location.hash.replace('#', '') as View;
-    const validViews: View[] = ['dashboard', 'settings', 'quiz', 'shadowing', 'coaching', 'gemini_live', 'composition', 'gotanakakei', 'freetalk', 'photodesc', 'help'];
+    const validViews: View[] = ['dashboard', 'settings', 'quiz', 'shadowing', 'coaching', 'gemini_live', 'composition', 'gotanakakei', 'freetalk', 'photodesc', 'tuning', 'help'];
     if (hash === 'monologue' as any) return 'gemini_live'; // alias for backward comp / aesthetic
     if (hash === 'reflex' as any) return 'composition'; // alias
     return validViews.includes(hash) ? hash : 'settings';
@@ -131,6 +132,13 @@ function App() {
             <Coffee size={18} /> Dialogue
           </button>
           <button 
+            className={`btn ${view === 'tuning' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setView('tuning')}
+            disabled={!geminiApiKey}
+          >
+            <Volume2 size={18} /> Tuning
+          </button>
+          <button 
             className={`btn ${view === 'photodesc' ? 'btn-primary' : 'btn-secondary'}`} 
             onClick={() => setView('photodesc')}
             disabled={!geminiApiKey}
@@ -218,6 +226,10 @@ function App() {
 
         {view === 'photodesc' && geminiApiKey && (
           <PhotoDescription geminiApiKey={geminiApiKey} geminiModel={geminiModel} />
+        )}
+        
+        {view === 'tuning' && geminiApiKey && (
+          <PronunciationTrainer geminiApiKey={geminiApiKey} geminiModel={geminiModel} geminiVoice={geminiVoice} />
         )}
         
         {view === 'help' && (

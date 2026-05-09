@@ -412,3 +412,30 @@ Rules:
     throw new Error("Failed to generate image prompt.");
   }
 }
+
+export async function generatePronunciationFeedback(apiKey: string, modelName: string, logs: string, theme: string): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: modelName });
+  
+  const prompt = `以下のログは、ユーザーが英語の発音トレーニング（テーマ: ${theme}）を行った記録です。
+このセッションの「総括フィードバック」を作成してください。
+以下の要素を含めてください：
+- 全体的な発音の明瞭さと、良かった点
+- 今回のテーマ（${theme}）に関して、うまくできていたことと、まだ課題として残っていること
+- 継続して練習すべき具体的な単語や音の指摘
+- 次回の練習へのアドバイス
+
+簡潔かつ励ましになるようなポジティブな口調で、マークダウン形式で出力してください。
+
+トランスクリプト:
+${logs}`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (e) {
+    console.error("Gemini Pronunciation Feedback error:", e);
+    throw new Error("Failed to generate pronunciation feedback.");
+  }
+}
