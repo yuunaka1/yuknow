@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.15.1] - 2026-05-09
+### Fixed
+- **UI/UX**: Improved vertical spacing and layout of Markdown content (Help pages and session feedback), specifically increasing margins for `H2`, `H3`, lists, and horizontal rules (`hr`).
+
 ## [1.15.0] - 2026-05-09
 ### Added
 - **Tuning Mode (Pronunciation Training)**: Added a new real-time pronunciation training mode (formerly requested as Pronunciation mode).
